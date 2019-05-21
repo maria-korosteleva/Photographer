@@ -50,8 +50,10 @@ int Photographer::run()
     // create VAOs
     // TODO: move to constructor? or object setter? In this case, add checks that the pbject is created
     // TODO: Share the location ids somehow!!
-    this->CreateTriangleVAO();
+    this->CreateObjectVAO();
 
+    // TUTORIAL: Wireframe mode
+    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  
     // TUTORIAL: Forever loop
     while (!glfwWindowShouldClose(window))
     {
@@ -65,39 +67,53 @@ int Photographer::run()
 
         // draw
         glUseProgram(shader_program_id);
-        //glUseProgram(shaderProgram);
-        glBindVertexArray(this->triangle_VAO_); // No need to do this every time
-        glDrawArrays(GL_TRIANGLES, 0, 3);   // last is the number of vertices
+        glBindVertexArray(this->object_vertex_array_); // No need to do this every time
+        //glDrawArrays(GL_TRIANGLES, 0, 3);   // last is the number of vertices
+        glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
 
         // swap the buffers and check all call events
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
-    // TODO!  optional: de-allocate all resources once they've outlived their purpose:
-    // To destructor? Store the VBO than!
-    // ------------------------------------------------------------------------
-    // glDeleteVertexArrays(1, &VAO);
-    // glDeleteBuffers(1, &VBO);
+    // clean-up
+    // TODO To destructor?
+    glDeleteVertexArrays(1, &this->object_vertex_array_);
+    glDeleteBuffers(1, &this->object_vertex_buffer_);
+    glDeleteBuffers(1, &this->object_element_buffer_);
+    this->object_vertex_array_ = this->object_element_buffer_ = this->object_vertex_buffer_ = 0;
     glDeleteProgram(shader_program_id);
 
     glfwTerminate();
+
     return 0;
 }
 
-void Photographer::CreateTriangleVAO()
+void Photographer::CreateObjectVAO()
 {
+    // id avalibility check
+    if (this->object_vertex_array_ > 0
+        || this->object_vertex_buffer_ > 0
+        || this->object_element_buffer_ > 0)
+    {
+        // catastrofY! Want to overwrite the existing buffers!
+        std::cout << "ERROR::CREATE OBJECT BUFFERS::OBJECT BUFFERS ARE ALREADY ALLOCATED. DATA IS LOST\n" << std::endl;
+    }
+
     // VAO allows storing the vertex attribures as an object for easy loading after
-    glGenVertexArrays(1, &this->triangle_VAO_);
-    glBindVertexArray(this->triangle_VAO_);
+    glGenVertexArrays(1, &this->object_vertex_array_);
+    glBindVertexArray(this->object_vertex_array_);
 
     // setup vertex buffer object
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
+    glGenBuffers(1, &this->object_vertex_buffer_);
+    glBindBuffer(GL_ARRAY_BUFFER, this->object_vertex_buffer_);
     // last parameter indicated that data won't change througout the process
-    glBufferData(GL_ARRAY_BUFFER, sizeof(this->triangle_verts_), this->triangle_verts_, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(this->rectangle_verts_), this->rectangle_verts_, GL_STATIC_DRAW);
+
+    // setup element buffer object -- for faces!
+    glGenBuffers(1, &this->object_element_buffer_);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->object_element_buffer_);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(this->rectangle_faces_), this->rectangle_faces_, GL_STATIC_DRAW);
 
     // Vertex data interpretation guide
     // location, size of the attribute, attribute type, data normalization bool, data stride, data offset
@@ -106,8 +122,10 @@ void Photographer::CreateTriangleVAO()
     glEnableVertexAttribArray(0);
 
     // Cleaning. Unbinding is not necessary, but I'm doing this for completeness
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    // Important to unbind GL_ELEMENT_ARRAY_BUFFER after Vertex Array
     glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 unsigned int Photographer::CompileVertexShader()

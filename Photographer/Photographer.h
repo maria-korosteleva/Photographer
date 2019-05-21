@@ -20,12 +20,13 @@ public:
 
 private:
     // useful vars
-    unsigned int triangle_VAO_;
+    unsigned int object_vertex_array_ = 0;
+    unsigned int object_vertex_buffer_ = 0;
+    unsigned int object_element_buffer_ = 0;
     // useful functions
-    void CreateTriangleVAO();
+    void CreateObjectVAO();
     
-    // static -> 
-    // Shader are created dynamically in run() function only to allocate GPU resources only for the run
+    // static -> Shaders are created dynamically in run() function only to allocate GPU resources only for the run
     // TODO rethink this behavior
     static unsigned int CompileVertexShader();
     static unsigned int CompileFragmentShader();
@@ -39,6 +40,20 @@ private:
          0.5f, -0.5f, 0.0f,
          0.0f,  0.5f, 0.0f
     };
+    // rectangle in Normalized Device Coordinates
+    static const std::size_t  kRectangleArrSize = 3*4;
+    float rectangle_verts_[kRectangleArrSize] = {
+         0.5f,  0.5f, 0.0f,  // top right
+         0.5f, -0.5f, 0.0f,  // bottom right
+        -0.5f, -0.5f, 0.0f,  // bottom left
+        -0.5f,  0.5f, 0.0f   // top left 
+    };
+    static const std::size_t  kRectangleFacesArrSize = 3 * 2;
+    unsigned int rectangle_faces_[kRectangleFacesArrSize] = {  // note that we start from 0!
+        0, 1, 3,   // first triangle
+        1, 2, 3    // second triangle
+    };
+
     // func from tutorial (working with input)
     void ProcessInput(GLFWwindow *window);
     // callbacks should be static!
