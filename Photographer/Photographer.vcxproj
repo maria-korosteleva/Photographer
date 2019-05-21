@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{C99364B1-C476-4931-BB2B-3E9DE37A2094}</ProjectGuid>
-    <RootNamespace>basicglfwopengl</RootNamespace>
+    <RootNamespace>Photographer</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
     <ProjectName>Photographer</ProjectName>
   </PropertyGroup>
