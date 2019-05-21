@@ -140,7 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\..\libs\Installed_libs\src\glad.c" />
+    <ClCompile Include="..\..\..\libs\Installed_libs\src\glad.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Photographer.cpp" />
   </ItemGroup>

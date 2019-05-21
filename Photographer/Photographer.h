@@ -1,22 +1,14 @@
 #pragma once
-/* 
-Class is capable of loading the mesh from the file (.obj, .ply?) and render several views of it 
-from the pre-defined set of the cameras
+// Class is capable of loading the mesh from the file (.obj, .ply?) and render several views of it 
+// from the pre-defined set of the cameras
 
-Requirements: 
-OpenGL 3.3 or higher. Only uses the core functionality so far
-
-Dependencies:
-glad (https://glad.dav1d.de/): please use the version that suits your settings
-glfw (https://github.com/glfw/glfw)
-*/
 
 #include <iostream>
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
 
 // Macro for a more convenient shader specification
-#define PHOTOGRAPHER_GLSL_TO_STRING(version, shader)  "#version " #version "\n" #shader
+#define PHOTOGRAPHER_GLSL_TO_STRING(version, shader)  "#version " #version " core \n" #shader  
 
 class Photographer
 {
@@ -28,13 +20,16 @@ public:
 
 private:
     // useful vars
-    unsigned int vertex_buffer_object_;
-    unsigned int shader_program_id_;
+    unsigned int triangle_VAO_;
     // useful functions
-    void BindVBO();
-    unsigned int CompileVertexShader();
-    unsigned int CompileFragmentShader();
-    void LinkShaders();
+    void CreateTriangleVAO();
+    
+    // static -> 
+    // Shader are created dynamically in run() function only to allocate GPU resources only for the run
+    // TODO rethink this behavior
+    static unsigned int CompileVertexShader();
+    static unsigned int CompileFragmentShader();
+    static unsigned int LinkShaders();
 
     // data from tutorial
     // triangle in Normalized Device Coordinates
