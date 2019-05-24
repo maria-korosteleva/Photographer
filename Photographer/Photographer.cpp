@@ -133,9 +133,13 @@ unsigned int Photographer::CompileVertexShader()
     // vertex shader code as string :D
     const char *vertex_shader_source = PHOTOGRAPHER_GLSL_TO_STRING(330, 
         layout (location = 0) in vec3 aPos;
-        void main()\n
+
+        out vec4 vertexColor;
+
+        void main()
         {
-           gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n
+           gl_Position = vec4(aPos, 1.0);
+           vertexColor = vec4(0.5, 0.0, 0.0, 1.0);
         }
     );
 
@@ -160,11 +164,13 @@ unsigned int Photographer::CompileVertexShader()
 unsigned int Photographer::CompileFragmentShader()
 {
     // shader code as string :D
-    const char *fragment_shader_source = PHOTOGRAPHER_GLSL_TO_STRING(460,
+    const char *fragment_shader_source = PHOTOGRAPHER_GLSL_TO_STRING
+    (460,
         out vec4 FragColor;
+        in vec4 vertexColor;
         void main()
         {
-            FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+            FragColor = vertexColor;
         }
     );   
 
