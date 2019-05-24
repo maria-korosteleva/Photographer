@@ -41,12 +41,12 @@ private:
          0.0f,  0.5f, 0.0f
     };
     // rectangle in Normalized Device Coordinates
-    static const std::size_t  kRectangleArrSize = 3*4;
+    static const std::size_t  kRectangleArrSize = 3*2*4;
     float rectangle_verts_[kRectangleArrSize] = {
-         0.5f,  0.5f, 0.0f,  // top right
-         0.5f, -0.5f, 0.0f,  // bottom right
-        -0.5f, -0.5f, 0.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f   // top left 
+         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // top right
+         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,  // bottom left
+        -0.5f,  0.5f, 0.0f, 0.5f, 0.5f, 0.0f   // top left 
     };
     static const std::size_t  kRectangleFacesArrSize = 3 * 2;
     unsigned int rectangle_faces_[kRectangleFacesArrSize] = {  // note that we start from 0!

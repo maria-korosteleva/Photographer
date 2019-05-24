@@ -67,13 +67,8 @@ int Photographer::run()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // state-setting function
         glClear(GL_COLOR_BUFFER_BIT);       // state-using function
 
-        // set color
-        float timeValue = glfwGetTime();
-        float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
-        glUseProgram(shader_program_id);    // required before setting
-        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
-
         // draw
+        glUseProgram(shader_program_id); 
         glBindVertexArray(this->object_vertex_array_); // No need to do this every time
         //glDrawArrays(GL_TRIANGLES, 0, 3);   // last is the number of vertices
         glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
@@ -125,8 +120,12 @@ void Photographer::CreateObjectVAO()
     // Vertex data interpretation guide
     // location, size of the attribute, attribute type, data normalization bool, data stride, data offset
     // takes data from the current binded VBO
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+    // color
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     // Cleaning. Unbinding is not necessary, but I'm doing this for completeness
     // Important to unbind GL_ELEMENT_ARRAY_BUFFER after Vertex Array
@@ -140,10 +139,14 @@ unsigned int Photographer::CompileVertexShader()
     // vertex shader code as string :D
     const char *vertex_shader_source = PHOTOGRAPHER_GLSL_TO_STRING(330, 
         layout (location = 0) in vec3 aPos;
+        layout (location = 1) in vec3 aColor;
+
+        out vec3 ourColor;
 
         void main()
         {
            gl_Position = vec4(aPos, 1.0);
+           ourColor = aColor;
         }
     );
 
@@ -171,7 +174,7 @@ unsigned int Photographer::CompileFragmentShader()
     const char *fragment_shader_source = PHOTOGRAPHER_GLSL_TO_STRING
     (460,
         out vec4 FragColor;
-        uniform vec4 ourColor;
+        in vec4 ourColor;
         void main()
         {
             FragColor = ourColor;
