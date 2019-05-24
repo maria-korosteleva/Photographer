@@ -46,6 +46,8 @@ int Photographer::run()
 
     // Link shaders: here to allocate resources only for the drawing loop
     unsigned int shader_program_id = Photographer::LinkShaders();
+    // get color variable id
+    int vertexColorLocation = glGetUniformLocation(shader_program_id, "ourColor");  // -1 indicated an error
 
     // create VAOs
     // TODO: move to constructor? or object setter? In this case, add checks that the pbject is created
@@ -65,8 +67,13 @@ int Photographer::run()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // state-setting function
         glClear(GL_COLOR_BUFFER_BIT);       // state-using function
 
+        // set color
+        float timeValue = glfwGetTime();
+        float greenValue = (sin(timeValue) / 2.0f) + 0.5f;
+        glUseProgram(shader_program_id);    // required before setting
+        glUniform4f(vertexColorLocation, 0.0f, greenValue, 0.0f, 1.0f);
+
         // draw
-        glUseProgram(shader_program_id);
         glBindVertexArray(this->object_vertex_array_); // No need to do this every time
         //glDrawArrays(GL_TRIANGLES, 0, 3);   // last is the number of vertices
         glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
@@ -134,12 +141,9 @@ unsigned int Photographer::CompileVertexShader()
     const char *vertex_shader_source = PHOTOGRAPHER_GLSL_TO_STRING(330, 
         layout (location = 0) in vec3 aPos;
 
-        out vec4 vertexColor;
-
         void main()
         {
            gl_Position = vec4(aPos, 1.0);
-           vertexColor = vec4(0.5, 0.0, 0.0, 1.0);
         }
     );
 
@@ -167,10 +171,10 @@ unsigned int Photographer::CompileFragmentShader()
     const char *fragment_shader_source = PHOTOGRAPHER_GLSL_TO_STRING
     (460,
         out vec4 FragColor;
-        in vec4 vertexColor;
+        uniform vec4 ourColor;
         void main()
         {
-            FragColor = vertexColor;
+            FragColor = ourColor;
         }
     );   
 
