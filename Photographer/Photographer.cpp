@@ -5,32 +5,30 @@
 
 Photographer::Photographer()
 {
-    // TUTORIAL load textures
-    tex_container_data_ = stbi_load(tex_container_path_, 
-        &tex_container_params_[0], 
-        &tex_container_params_[1], 
-        &tex_container_params_[2], 0);
-    if (!tex_container_data_)
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
 }
 
 Photographer::~Photographer()
 {
-    // TUTORIAL load textures
-    stbi_image_free(tex_container_data_);
 }
 
 int Photographer::run()
 {
     GLFWwindow* window = InitWindowContext();
     RegisterCallbacks(window);
-    Shader shader_program(vertex_shader_path_, fragment_shader_path_);
+
+    if (shader_program_ != nullptr)
+    {
+        delete shader_program_;
+    }
+    shader_program_ = new Shader(vertex_shader_path_, fragment_shader_path_);
     
     CreateObjectVAO();
-    BindTextures();
+    tex_container_ = LoadTexture(tex_container_path_);
+    tex_face_ = LoadTexture(tex_smiley_path_, true);
 
+    shader_program_->use();
+    shader_program_->SetUniform("texture2", 1);   // bind the second texture location manually
+    
     while (!glfwWindowShouldClose(window))
     {
         // input
@@ -39,13 +37,15 @@ int Photographer::run()
         // render commands
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // state-setting function
         glClear(GL_COLOR_BUFFER_BIT);       // state-using function
-
-        shader_program.use();
         
-        // draw
-        float timeValue = glfwGetTime();
+        // bind textures
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, tex_container_);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, tex_face_);
 
-        glBindTexture(GL_TEXTURE_2D, texture_);
+        shader_program_->SetUniform("mix_value", mix_rate_);
+        // draw vertices
         glBindVertexArray(this->object_vertex_array_); // No need to do this every time
         glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
 
@@ -102,6 +102,46 @@ void Photographer::CreateObjectVAO()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
+unsigned int Photographer::LoadTexture(const char * filename, bool alpha)
+{
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+
+    // set the texture wrapping/filtering options (on the currently bound texture object)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // load
+    int width, height, n_channels;
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char * tex_data = stbi_load(filename, &width, &height, &n_channels, 0);
+    if (!tex_data)
+    {
+        std::cout << "Failed to load texture" << std::endl;
+        return 0;
+    }
+
+    // generate texture & mipmaps
+    if (alpha)
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_data);
+    }
+    else
+    {
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, tex_data);
+    }
+    
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    // it's ok to free the tex_container_data_ here.
+    stbi_image_free(tex_data);
+
+    return texture;
+}
+
 GLFWwindow* Photographer::InitWindowContext()
 {
     glfwInit();
@@ -147,36 +187,16 @@ void Photographer::RegisterCallbacks(GLFWwindow * window)
 
 void Photographer::CleanAndCloseContext()
 {
-    glDeleteVertexArrays(1, &this->object_vertex_array_);
-    glDeleteBuffers(1, &this->object_vertex_buffer_);
-    glDeleteBuffers(1, &this->object_element_buffer_);
-    this->object_vertex_array_ = this->object_element_buffer_ = this->object_vertex_buffer_ = 0;
+    glDeleteVertexArrays(1, &object_vertex_array_);
+    glDeleteBuffers(1, &object_vertex_buffer_);
+    glDeleteBuffers(1, &object_element_buffer_);
+    glDeleteTextures(1, &tex_container_);
+    glDeleteTextures(1, &tex_face_);
+    delete shader_program_;
     glfwTerminate();
-}
 
-void Photographer::BindTextures()
-{
-    if (texture_ > 0)
-    {
-        // catastrofY! Want to overwrite the existing texture!
-        std::cout << "ERROR::BIND TEXTURE::TEXTURE WAS ALREADY ALLOCATED. DATA IS LOST\n" << std::endl;
-    }
-
-    glGenTextures(1, &texture_);
-    glBindTexture(GL_TEXTURE_2D, texture_);
-
-    // set the texture wrapping/filtering options (on the currently bound texture object)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    
-    // generate texture & mipmaps
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
-        tex_container_params_[0], tex_container_params_[1], 0,
-        GL_RGB, GL_UNSIGNED_BYTE, tex_container_data_);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    // it's ok to free the tex_container_data_ here. But I'm doing this in destructor
+    shader_program_ = nullptr;
+    object_vertex_array_ = object_element_buffer_ = object_vertex_buffer_ = tex_container_ = tex_face_ = 0;
 }
 
 void Photographer::ProcessInput(GLFWwindow * window)
@@ -184,6 +204,18 @@ void Photographer::ProcessInput(GLFWwindow * window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
+    }
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+    {
+        mix_rate_ += 0.02;
+        if (mix_rate_ > 1.0f) mix_rate_ = 1.0;
+        shader_program_->SetUniform("mix_rate", mix_rate_);
+    }
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    {
+        mix_rate_ -= 0.02;
+        if (mix_rate_ < 0.0f) mix_rate_ = 0.0;
+        shader_program_->SetUniform("mix_rate", mix_rate_);
     }
 }
 

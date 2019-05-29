@@ -27,12 +27,13 @@ private:
     static constexpr const char const * fragment_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/FragmentShader.glsl";
     // functions
     void CreateObjectVAO();
+    unsigned int LoadTexture(const char * filename, bool alpha = false);
+
     GLFWwindow* InitWindowContext();
     void RegisterCallbacks(GLFWwindow* window);
     void CleanAndCloseContext();
-
+    
     // func from tutorial
-    void BindTextures();
     void ProcessInput(GLFWwindow *window);
     // callbacks should be static!
     static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
@@ -41,13 +42,16 @@ private:
     unsigned int object_vertex_array_ = 0;
     unsigned int object_vertex_buffer_ = 0;
     unsigned int object_element_buffer_ = 0;
-    unsigned int texture_ = 0;
+    unsigned int tex_container_ = 0;
+    unsigned int tex_face_ = 0;
+    Shader* shader_program_ = nullptr;
+    float mix_rate_ = 0.2;
     
     // data from tutorial
     // triangle in Normalized Device Coordinates
     static constexpr const char* const tex_container_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Textures/container.jpg";
-    int tex_container_params_[3];  // width, height, number of channels
-    unsigned char *tex_container_data_;
+    static constexpr const char* const tex_smiley_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Textures/awesomeface.png";
+
     static const std::size_t  kTriangleArrSize = 9;
     float triangle_verts_[kTriangleArrSize] = {
         -0.5f, -0.5f, 0.0f,
