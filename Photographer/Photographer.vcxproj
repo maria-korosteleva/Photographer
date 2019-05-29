@@ -144,6 +144,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Photographer.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="Shaders\stb_source_loader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Photographer.h" />

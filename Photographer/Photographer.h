@@ -7,8 +7,10 @@
 #include <iostream>
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
+#include <stb/stb_image.h>
 
 #include "Shader.h"
+
 
 // #define __APPLE__    // uncomment this statement to fix compilation on Mac OS X
 
@@ -23,32 +25,44 @@ public:
 private:
     static constexpr const char* const vertex_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/VertexShader.glsl";
     static constexpr const char const * fragment_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/FragmentShader.glsl";
-    // useful functions
+    // functions
     void CreateObjectVAO();
     GLFWwindow* InitWindowContext();
     void RegisterCallbacks(GLFWwindow* window);
     void CleanAndCloseContext();
 
-    // useful vars
+    // func from tutorial
+    void BindTextures();
+    void ProcessInput(GLFWwindow *window);
+    // callbacks should be static!
+    static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
+
+    // vars
     unsigned int object_vertex_array_ = 0;
     unsigned int object_vertex_buffer_ = 0;
     unsigned int object_element_buffer_ = 0;
+    unsigned int texture_ = 0;
     
     // data from tutorial
     // triangle in Normalized Device Coordinates
+    static constexpr const char* const tex_container_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Textures/container.jpg";
+    int tex_container_params_[3];  // width, height, number of channels
+    unsigned char *tex_container_data_;
     static const std::size_t  kTriangleArrSize = 9;
     float triangle_verts_[kTriangleArrSize] = {
         -0.5f, -0.5f, 0.0f,
          0.5f, -0.5f, 0.0f,
          0.0f,  0.5f, 0.0f
     };
+
     // rectangle in Normalized Device Coordinates
-    static const std::size_t  kRectangleArrSize = 3*2*4;
+    static const std::size_t  kRectangleArrSize = (3 + 3 + 2)*4;
     float rectangle_verts_[kRectangleArrSize] = {
-         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f,  // top right
-         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f,  // bottom left
-        -0.5f,  0.5f, 0.0f, 0.5f, 0.5f, 0.0f   // top left 
+        // positions          // colors           // texture coords
+         0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+         0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
     };
     static const std::size_t  kRectangleFacesArrSize = 3 * 2;
     unsigned int rectangle_faces_[kRectangleFacesArrSize] = {  // note that we start from 0!
@@ -56,9 +70,5 @@ private:
         1, 2, 3    // second triangle
     };
 
-    // func from tutorial (working with input)
-    void ProcessInput(GLFWwindow *window);
-    // callbacks should be static!
-    static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 };
 
