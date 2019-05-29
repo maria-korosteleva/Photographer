@@ -143,9 +143,11 @@
     <ClCompile Include="..\..\..\libs\Installed_libs\src\glad.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Photographer.cpp" />
+    <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Photographer.h" />
+    <ClInclude Include="Shader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
