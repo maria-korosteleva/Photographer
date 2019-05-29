@@ -1,12 +1,16 @@
 #pragma once
 // Class is capable of loading the mesh from the file (.obj, .ply?) and render several views of it 
 // from the pre-defined set of the cameras
+// Should know the locations of the shader files
+// Should know the location of the input of vertex shader
 
 #include <iostream>
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
 
 #include "Shader.h"
+
+// #define __APPLE__    // uncomment this statement to fix compilation on Mac OS X
 
 class Photographer
 {
@@ -21,6 +25,9 @@ private:
     static constexpr const char const * fragment_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/FragmentShader.glsl";
     // useful functions
     void CreateObjectVAO();
+    GLFWwindow* InitWindowContext();
+    void RegisterCallbacks(GLFWwindow* window);
+    void CleanAndCloseContext();
 
     // useful vars
     unsigned int object_vertex_array_ = 0;

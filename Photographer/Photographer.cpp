@@ -4,68 +4,29 @@ Photographer::Photographer()
 {
 }
 
-
 Photographer::~Photographer()
 {
 }
 
 int Photographer::run()
 {
-    glfwInit();
-    // Configure GLFW
-    // TODO change to appropriate version afterwards
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // for MAC
-
-    // create a window
-    int win_width = 800;
-    int win_height = 600;
-    GLFWwindow* window = glfwCreateWindow(win_width, win_height, "LearnOpenGL", NULL, NULL);
-    if (window == NULL)
-    {
-        std::cout << "Failed to create GLFW window" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-    glfwMakeContextCurrent(window);
-
-    // load glad
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return -1;
-    }
-
-    // set viewport size -- viewport is needed to calc screen coordinates from normalized range
-    glViewport(0, 0, win_width, win_height);
-
-    // TUTORIAL: set viewport size change callback
-    glfwSetFramebufferSizeCallback(window, Photographer::FramebufferSizeCallback);
-
-    // create shaders
+    GLFWwindow* window = InitWindowContext();
+    RegisterCallbacks(window);
     Shader shader_program(vertex_shader_path_, fragment_shader_path_);
-
-    // create VAOs
-    // TODO: Share the location ids somehow!!
     CreateObjectVAO();
 
-    // TUTORIAL: Forever loop
     while (!glfwWindowShouldClose(window))
     {
         // input
         this->ProcessInput(window);
 
         // render commands
-        // clear color buffer
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // state-setting function
         glClear(GL_COLOR_BUFFER_BIT);       // state-using function
 
         // draw
         shader_program.use();
         glBindVertexArray(this->object_vertex_array_); // No need to do this every time
-        //glDrawArrays(GL_TRIANGLES, 0, 3);   // last is the number of vertices
         glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
 
         // swap the buffers and check all call events
@@ -73,15 +34,7 @@ int Photographer::run()
         glfwPollEvents();
     }
 
-    // clean-up
-    // TODO To destructor?
-    glDeleteVertexArrays(1, &this->object_vertex_array_);
-    glDeleteBuffers(1, &this->object_vertex_buffer_);
-    glDeleteBuffers(1, &this->object_element_buffer_);
-    this->object_vertex_array_ = this->object_element_buffer_ = this->object_vertex_buffer_ = 0;
-
-    glfwTerminate();
-
+    CleanAndCloseContext();
     return 0;
 }
 
@@ -126,6 +79,58 @@ void Photographer::CreateObjectVAO()
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+GLFWwindow* Photographer::InitWindowContext()
+{
+    glfwInit();
+
+    // Configure GLFW
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+#ifdef __APPLE__
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
+#endif
+
+    // create a window
+    int win_width = 800;
+    int win_height = 600;
+    GLFWwindow* window = glfwCreateWindow(win_width, win_height, "LearnOpenGL", NULL, NULL);
+    if (window == NULL)
+    {
+        std::cout << "Failed to create GLFW window" << std::endl;
+        glfwTerminate();
+        return 0;
+    }
+    glfwMakeContextCurrent(window);
+
+    // load glad
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+    {
+        std::cout << "Failed to initialize GLAD" << std::endl;
+        return 0;
+    }
+
+    // set viewport size -- viewport is needed to calc screen coordinates from normalized range
+    glViewport(0, 0, win_width, win_height);
+
+    return window;
+}
+
+void Photographer::RegisterCallbacks(GLFWwindow * window)
+{
+    glfwSetFramebufferSizeCallback(window, Photographer::FramebufferSizeCallback);
+}
+
+void Photographer::CleanAndCloseContext()
+{
+    glDeleteVertexArrays(1, &this->object_vertex_array_);
+    glDeleteBuffers(1, &this->object_vertex_buffer_);
+    glDeleteBuffers(1, &this->object_element_buffer_);
+    this->object_vertex_array_ = this->object_element_buffer_ = this->object_vertex_buffer_ = 0;
+    glfwTerminate();
 }
 
 void Photographer::ProcessInput(GLFWwindow * window)
