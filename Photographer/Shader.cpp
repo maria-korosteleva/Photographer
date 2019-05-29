@@ -8,8 +8,8 @@ Shader::Shader(const GLchar * vertex_path, const GLchar * fragment_path)
     // read & compile
     if (vertex_path != nullptr)
     {
-        const char * vertex_code = Shader::ReadCodeFile(vertex_path).c_str();
-        vertex_shader = Shader::CompileVertexShader(vertex_code);
+        std::string vertex_code = Shader::ReadCodeFile(vertex_path);
+        vertex_shader = Shader::CompileVertexShader(vertex_code.c_str());
     }
     else
     {
@@ -18,8 +18,8 @@ Shader::Shader(const GLchar * vertex_path, const GLchar * fragment_path)
     
     if (fragment_path != nullptr)
     {
-        const char * fragment_code = Shader::ReadCodeFile(fragment_path).c_str();
-        fragment_shader = Shader::CompileFragmentShader(fragment_code);
+        std::string fragment_code = Shader::ReadCodeFile(fragment_path);
+        fragment_shader = Shader::CompileFragmentShader(fragment_code.c_str());
     }
     else
     {

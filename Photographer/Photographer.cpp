@@ -45,15 +45,12 @@ int Photographer::run()
     glfwSetFramebufferSizeCallback(window, Photographer::FramebufferSizeCallback);
 
     // create shaders
-    Shader shader_program;
+    Shader shader_program(vertex_shader_path_, fragment_shader_path_);
 
     // create VAOs
-    // TODO: move to constructor? or object setter? In this case, add checks that the pbject is created
     // TODO: Share the location ids somehow!!
-    this->CreateObjectVAO();
+    CreateObjectVAO();
 
-    // TUTORIAL: Wireframe mode
-    // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  
     // TUTORIAL: Forever loop
     while (!glfwWindowShouldClose(window))
     {

@@ -17,6 +17,8 @@ public:
     int run();
 
 private:
+    static constexpr const char* const vertex_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/VertexShader.glsl";
+    static constexpr const char const * fragment_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/FragmentShader.glsl";
     // useful functions
     void CreateObjectVAO();
 
