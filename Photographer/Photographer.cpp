@@ -24,8 +24,12 @@ int Photographer::run()
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // state-setting function
         glClear(GL_COLOR_BUFFER_BIT);       // state-using function
 
-        // draw
         shader_program.use();
+        
+        // draw
+        float timeValue = glfwGetTime();
+        shader_program.SetUniform("xOffset", sin(timeValue) / 2);
+
         glBindVertexArray(this->object_vertex_array_); // No need to do this every time
         glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
 
