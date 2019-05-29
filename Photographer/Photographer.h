@@ -38,14 +38,16 @@ private:
     // callbacks should be static!
     static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
 
-    // vars
+    // running ids
     unsigned int object_vertex_array_ = 0;
     unsigned int object_vertex_buffer_ = 0;
     unsigned int object_element_buffer_ = 0;
     unsigned int tex_container_ = 0;
     unsigned int tex_face_ = 0;
     Shader* shader_program_ = nullptr;
-    float mix_rate_ = 0.2;
+
+    // appearence control
+    float texture_mix_rate_ = 0.2;
     
     // data from tutorial
     // triangle in Normalized Device Coordinates

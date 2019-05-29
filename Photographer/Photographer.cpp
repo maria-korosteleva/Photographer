@@ -16,13 +16,11 @@ int Photographer::run()
     GLFWwindow* window = InitWindowContext();
     RegisterCallbacks(window);
 
-    if (shader_program_ != nullptr)
-    {
-        delete shader_program_;
-    }
+    if (shader_program_ != nullptr) delete shader_program_;
     shader_program_ = new Shader(vertex_shader_path_, fragment_shader_path_);
     
     CreateObjectVAO();
+
     tex_container_ = LoadTexture(tex_container_path_);
     tex_face_ = LoadTexture(tex_smiley_path_, true);
 
@@ -44,7 +42,7 @@ int Photographer::run()
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, tex_face_);
 
-        shader_program_->SetUniform("mix_value", mix_rate_);
+        shader_program_->SetUniform("mix_value", texture_mix_rate_);
         // draw vertices
         glBindVertexArray(this->object_vertex_array_); // No need to do this every time
         glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
@@ -207,15 +205,15 @@ void Photographer::ProcessInput(GLFWwindow * window)
     }
     if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
     {
-        mix_rate_ += 0.02;
-        if (mix_rate_ > 1.0f) mix_rate_ = 1.0;
-        shader_program_->SetUniform("mix_rate", mix_rate_);
+        texture_mix_rate_ += 0.02;
+        if (texture_mix_rate_ > 1.0f) texture_mix_rate_ = 1.0;
+        shader_program_->SetUniform("mix_rate", texture_mix_rate_);
     }
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
-        mix_rate_ -= 0.02;
-        if (mix_rate_ < 0.0f) mix_rate_ = 0.0;
-        shader_program_->SetUniform("mix_rate", mix_rate_);
+        texture_mix_rate_ -= 0.02;
+        if (texture_mix_rate_ < 0.0f) texture_mix_rate_ = 0.0;
+        shader_program_->SetUniform("mix_rate", texture_mix_rate_);
     }
 }
 
