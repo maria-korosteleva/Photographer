@@ -6,6 +6,8 @@
 #include <sstream>
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 // Macro for a more convenient shader specification
 #define SHADER_CODE_GLSL_TO_STRING(version, shader)  "#version " #version " core \n" #shader  
@@ -22,6 +24,7 @@ class Shader
     void SetUniform(const std::string &name, bool value) const;
     void SetUniform(const std::string &name, int value) const;
     void SetUniform(const std::string &name, float value) const;
+    void SetUniform(const std::string &name, glm::mat4 value) const;
     // Program ID
     unsigned int ID() { return this->ID_; }
   

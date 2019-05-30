@@ -15,36 +15,52 @@ int Photographer::run()
 {
     GLFWwindow* window = InitWindowContext();
     RegisterCallbacks(window);
-
-    if (shader_program_ != nullptr) delete shader_program_;
-    shader_program_ = new Shader(vertex_shader_path_, fragment_shader_path_);
     
     CreateObjectVAO();
 
     tex_container_ = LoadTexture(tex_container_path_);
     tex_face_ = LoadTexture(tex_smiley_path_, true);
 
+    if (shader_program_ != nullptr) delete shader_program_;
+    shader_program_ = new Shader(vertex_shader_path_, fragment_shader_path_);
     shader_program_->use();
     shader_program_->SetUniform("texture2", 1);   // bind the second texture location manually
+
+    
     
     while (!glfwWindowShouldClose(window))
     {
-        // input
+        // TUTORIAL input
         this->ProcessInput(window);
 
         // render commands
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // state-setting function
         glClear(GL_COLOR_BUFFER_BIT);       // state-using function
         
-        // bind textures
+        // TUTORIAL bind textures
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, tex_container_);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, tex_face_);
-
         shader_program_->SetUniform("mix_value", texture_mix_rate_);
+
+        // math
+        glm::mat4 transform = glm::mat4(1.0f);
+        // the order is important 
+        transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
+        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));  // last param should be unit vector
+        shader_program_->SetUniform("transform", transform);
+
         // draw vertices
         glBindVertexArray(this->object_vertex_array_); // No need to do this every time
+        glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
+        
+        // second container
+        glm::mat4 transform2 = glm::mat4(1.0f);
+        // the order is important 
+        transform2 = glm::translate(transform2, glm::vec3(-0.5f, 0.5f, 0.0f));
+        transform2 = glm::scale(transform2, glm::vec3(sin((float)glfwGetTime()), sin((float)glfwGetTime()), 1.0f));  // last param should be unit vector
+        shader_program_->SetUniform("transform", transform2);
         glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
 
         // swap the buffers and check all call events

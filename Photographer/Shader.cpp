@@ -59,6 +59,12 @@ void Shader::SetUniform(const std::string & name, float value) const
     glUniform1f(glGetUniformLocation(ID_, name.c_str()), value);
 }
 
+void Shader::SetUniform(const std::string & name, glm::mat4 value) const
+{
+    unsigned int location = glGetUniformLocation(ID_, name.c_str());
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
+}
+
 void Shader::CreateProgram(unsigned int vertex_shader, unsigned int fragment_shader)
 {
     // link shaders
