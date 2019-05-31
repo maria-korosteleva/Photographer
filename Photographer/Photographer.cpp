@@ -26,8 +26,15 @@ int Photographer::run()
     shader_program_->use();
     shader_program_->SetUniform("texture2", 1);   // bind the second texture location manually
 
+    // going 3D
+    glm::mat4 view = glm::mat4(1.0f);
+    // note that we're translating the scene in the reverse direction of where we want to move
+    view = glm::translate(view, glm::vec3(0.0f, -1.0f, -10.0f));
+    glm::mat4 projection;
+    projection = glm::perspective(glm::radians(45.0f), win_width_ / win_height_, 0.1f, 100.0f);
     
-    
+    glBindVertexArray(this->object_vertex_array_);
+
     while (!glfwWindowShouldClose(window))
     {
         // TUTORIAL input
@@ -35,7 +42,7 @@ int Photographer::run()
 
         // render commands
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // state-setting function
-        glClear(GL_COLOR_BUFFER_BIT);       // state-using function
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);       // state-using function
         
         // TUTORIAL bind textures
         glActiveTexture(GL_TEXTURE0);
@@ -44,25 +51,29 @@ int Photographer::run()
         glBindTexture(GL_TEXTURE_2D, tex_face_);
         shader_program_->SetUniform("mix_value", texture_mix_rate_);
 
-        // math
-        glm::mat4 transform = glm::mat4(1.0f);
-        // the order is important 
-        transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-        transform = glm::rotate(transform, (float)glfwGetTime(), glm::vec3(0.0, 0.0, 1.0));  // last param should be unit vector
-        shader_program_->SetUniform("transform", transform);
+        // projection
+        shader_program_->SetUniform("view", view);
+        shader_program_->SetUniform("projection", projection);
 
-        // draw vertices
-        glBindVertexArray(this->object_vertex_array_); // No need to do this every time
-        glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
+        // draw cubes
+        for (int i = 0; i < num_cubes_; ++i)
+        {
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, cube_positions_[i]);
+            if (i % 3 == 0)
+            {
+                model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
+            }
+            else
+            {
+                float angle = 20.0f * i;
+                model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
+            }
+            shader_program_->SetUniform("model", model);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
+        //glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
         
-        // second container
-        glm::mat4 transform2 = glm::mat4(1.0f);
-        // the order is important 
-        transform2 = glm::translate(transform2, glm::vec3(-0.5f, 0.5f, 0.0f));
-        transform2 = glm::scale(transform2, glm::vec3(sin((float)glfwGetTime()), sin((float)glfwGetTime()), 1.0f));  // last param should be unit vector
-        shader_program_->SetUniform("transform", transform2);
-        glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
-
         // swap the buffers and check all call events
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -91,29 +102,26 @@ void Photographer::CreateObjectVAO()
     glGenBuffers(1, &object_vertex_buffer_);
     glBindBuffer(GL_ARRAY_BUFFER, object_vertex_buffer_);
     // last parameter indicated that data won't change througout the process
-    glBufferData(GL_ARRAY_BUFFER, sizeof(rectangle_verts_), rectangle_verts_, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_verts_), cube_verts_, GL_STATIC_DRAW);
 
     // setup element buffer object -- for faces!
-    glGenBuffers(1, &object_element_buffer_);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object_element_buffer_);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(this->rectangle_faces_), rectangle_faces_, GL_STATIC_DRAW);
+    //glGenBuffers(1, &object_element_buffer_);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object_element_buffer_);
+    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(this->rectangle_faces_), rectangle_faces_, GL_STATIC_DRAW);
 
     // Vertex data interpretation guide
     // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    // color
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
     // texture coordinates
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
 
     // Cleaning. Unbinding is not necessary, but I'm doing this for completeness
     // Important to unbind GL_ELEMENT_ARRAY_BUFFER after Vertex Array
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 unsigned int Photographer::LoadTexture(const char * filename, bool alpha)
@@ -170,9 +178,7 @@ GLFWwindow* Photographer::InitWindowContext()
 #endif
 
     // create a window
-    int win_width = 800;
-    int win_height = 600;
-    GLFWwindow* window = glfwCreateWindow(win_width, win_height, "LearnOpenGL", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(win_width_, win_height_, "Photographer", NULL, NULL);
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
@@ -189,7 +195,9 @@ GLFWwindow* Photographer::InitWindowContext()
     }
 
     // set viewport size -- viewport is needed to calc screen coordinates from normalized range
-    glViewport(0, 0, win_width, win_height);
+    glViewport(0, 0, win_width_, win_height_);
+
+    glEnable(GL_DEPTH_TEST);
 
     return window;
 }
