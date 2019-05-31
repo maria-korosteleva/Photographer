@@ -13,6 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "Shader.h"
+#include "Camera.h"
 
 
 // #define __APPLE__    // uncomment this statement to fix compilation on Mac OS X
@@ -55,17 +56,16 @@ private:
     unsigned int object_element_buffer_ = 0;
     unsigned int tex_container_ = 0;
     unsigned int tex_face_ = 0;
+    
+    // tools
     Shader* shader_program_ = nullptr;
+    static Camera* camera_;
+
 
     // appearence control
     float texture_mix_rate_ = 0.2;
     float win_width_ = 800;
     float win_height_ = 600;
-
-    // TUTORIAL camera
-    glm::vec3 camera_pos_ = glm::vec3(0.0f, 0.0f, 3.0f);
-    glm::vec3 camera_front_ = glm::vec3(0.0f, 0.0f, -3.0f);
-    glm::vec3 camera_up_ = glm::vec3(0.0f, 1.0f, 0.0f);
     
     // TUTORIAL keep track of rendering speed for camera speed adjustment
     float delta_time_ = 0.0f;	// Time between current frame and last frame

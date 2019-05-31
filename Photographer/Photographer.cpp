@@ -6,9 +6,7 @@
 float Photographer::lastX_ = 400;
 float Photographer::lastY_ = 300;
 bool Photographer::first_mouse_ = true;
-float Photographer::yaw_ = 0.0f;
-float Photographer::pitch_ = 0.0f;
-float Photographer::fov_ = 45.0f;
+Camera* Photographer::camera_ = nullptr;
 
 Photographer::Photographer()
 {
@@ -37,8 +35,8 @@ int Photographer::run()
     Photographer::lastX_ = 400;
     Photographer::lastY_ = 300;
     first_mouse_ = true;
-    yaw_ = -90.0f;
-    pitch_ = 0.0f;
+    camera_ = new Camera(win_width_, win_height_);
+    camera_->SetPosition(glm::vec3(0.0f, 0.0f, 3.0f));
 
     glBindVertexArray(this->object_vertex_array_);
     last_frame_time_ = glfwGetTime();
@@ -58,19 +56,9 @@ int Photographer::run()
         glBindTexture(GL_TEXTURE_2D, tex_face_);
         shader_program_->SetUniform("mix_value", texture_mix_rate_);
 
-        // projection
-        glm::mat4 projection;
-        projection = glm::perspective(glm::radians(fov_), win_width_ / win_height_, 0.1f, 100.0f);
-        shader_program_->SetUniform("projection", projection);
-
         // camera
-        glm::mat4 view;
-        camera_front_.x = cos(glm::radians(pitch_)) * cos(glm::radians(yaw_));
-        camera_front_.y = sin(glm::radians(pitch_));
-        camera_front_.z = cos(glm::radians(pitch_)) * sin(glm::radians(yaw_));
-        camera_front_ = glm::normalize(camera_front_);
-        view = glm::lookAt(camera_pos_, camera_pos_ + camera_front_, camera_up_);
-        shader_program_->SetUniform("view", view);
+        shader_program_->SetUniform("view", camera_->GetGlViewMatrix());
+        shader_program_->SetUniform("projection", camera_->GetGlProjectionMatrix());
 
         // draw cubes
         for (int i = 0; i < num_cubes_; ++i)
@@ -242,9 +230,11 @@ void Photographer::CleanAndCloseContext()
     glDeleteTextures(1, &tex_container_);
     glDeleteTextures(1, &tex_face_);
     delete shader_program_;
+    delete camera_;
     glfwTerminate();
 
     shader_program_ = nullptr;
+    camera_ = nullptr;
     object_vertex_array_ = object_element_buffer_ = object_vertex_buffer_ = tex_container_ = tex_face_ = 0;
 }
 
@@ -268,15 +258,14 @@ void Photographer::ProcessInput(GLFWwindow * window)
     }
 
     // camera control
-    float cameraSpeed = 2.5f * delta_time_; // adjust accordingly
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera_pos_ += cameraSpeed * camera_front_;
+        camera_->MovePosition(camera_->FORWARD, delta_time_);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera_pos_ -= cameraSpeed * camera_front_;
+        camera_->MovePosition(camera_->BACKWARD, delta_time_);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera_pos_ -= glm::normalize(glm::cross(camera_front_, camera_up_)) * cameraSpeed;
+        camera_->MovePosition(camera_->LEFT, delta_time_);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera_pos_ += glm::normalize(glm::cross(camera_front_, camera_up_)) * cameraSpeed;
+        camera_->MovePosition(camera_->RIGHT, delta_time_);
 }
 
 void Photographer::FramebufferSizeCallback(GLFWwindow * window, int width, int height)
@@ -298,24 +287,10 @@ void Photographer::MouseCallback(GLFWwindow * window, double xpos, double ypos)
     lastX_ = xpos;
     lastY_ = ypos;
 
-    float sensitivity = 0.05f;
-    xoffset *= sensitivity;
-    yoffset *= sensitivity;
-
-    yaw_ += xoffset;
-    pitch_ += yoffset;
-
-    if (pitch_ > 89.0f) pitch_ = 89.0f;
-    if (pitch_ < -89.0f) pitch_ = -89.0f;
-
+    camera_->UpdateRotation(yoffset, xoffset);
 }
 
 void Photographer::ScrollCallback(GLFWwindow * window, double xoffset, double yoffset)
 {
-    if (fov_ >= 1.0f && fov_ <= 45.0f)
-        fov_ -= yoffset;
-    if (fov_ <= 1.0f)
-        fov_ = 1.0f;
-    if (fov_ >= 45.0f)
-        fov_ = 45.0f;
+    camera_->Zoom(yoffset);
 }
