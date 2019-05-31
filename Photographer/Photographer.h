@@ -20,6 +20,12 @@
 class Photographer
 {
 public:
+    // TUTORIAL keep track of the mouse
+    static float yaw_, pitch_;
+    static float lastX_, lastY_;
+    static bool first_mouse_;
+    static float fov_;
+
     Photographer();
     ~Photographer();
 
@@ -40,6 +46,8 @@ private:
     void ProcessInput(GLFWwindow *window);
     // callbacks should be static!
     static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
+    static void MouseCallback(GLFWwindow* window, double xpos, double ypos);
+    static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
     // running ids
     unsigned int object_vertex_array_ = 0;
@@ -59,7 +67,7 @@ private:
     glm::vec3 camera_front_ = glm::vec3(0.0f, 0.0f, -3.0f);
     glm::vec3 camera_up_ = glm::vec3(0.0f, 1.0f, 0.0f);
     
-    // keep track of rendering speed for camera speed adjustment
+    // TUTORIAL keep track of rendering speed for camera speed adjustment
     float delta_time_ = 0.0f;	// Time between current frame and last frame
     float last_frame_time_ = 0.0f; // Time of last frame
 
@@ -151,4 +159,3 @@ private:
     };
 
 };
-

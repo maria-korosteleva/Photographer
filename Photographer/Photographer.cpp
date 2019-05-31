@@ -3,6 +3,13 @@
 
 #include "Photographer.h"
 
+float Photographer::lastX_ = 400;
+float Photographer::lastY_ = 300;
+bool Photographer::first_mouse_ = true;
+float Photographer::yaw_ = 0.0f;
+float Photographer::pitch_ = 0.0f;
+float Photographer::fov_ = 45.0f;
+
 Photographer::Photographer()
 {
 }
@@ -27,8 +34,11 @@ int Photographer::run()
     shader_program_->SetUniform("texture2", 1);   // bind the second texture location manually
 
     // going 3D
-    glm::mat4 projection;
-    projection = glm::perspective(glm::radians(45.0f), win_width_ / win_height_, 0.1f, 100.0f);
+    Photographer::lastX_ = 400;
+    Photographer::lastY_ = 300;
+    first_mouse_ = true;
+    yaw_ = -90.0f;
+    pitch_ = 0.0f;
 
     glBindVertexArray(this->object_vertex_array_);
     last_frame_time_ = glfwGetTime();
@@ -49,10 +59,16 @@ int Photographer::run()
         shader_program_->SetUniform("mix_value", texture_mix_rate_);
 
         // projection
+        glm::mat4 projection;
+        projection = glm::perspective(glm::radians(fov_), win_width_ / win_height_, 0.1f, 100.0f);
         shader_program_->SetUniform("projection", projection);
 
         // camera
         glm::mat4 view;
+        camera_front_.x = cos(glm::radians(pitch_)) * cos(glm::radians(yaw_));
+        camera_front_.y = sin(glm::radians(pitch_));
+        camera_front_.z = cos(glm::radians(pitch_)) * sin(glm::radians(yaw_));
+        camera_front_ = glm::normalize(camera_front_);
         view = glm::lookAt(camera_pos_, camera_pos_ + camera_front_, camera_up_);
         shader_program_->SetUniform("view", view);
 
@@ -205,12 +221,17 @@ GLFWwindow* Photographer::InitWindowContext()
 
     glEnable(GL_DEPTH_TEST);
 
+    // TUTORIAL for a mouse control
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     return window;
 }
 
 void Photographer::RegisterCallbacks(GLFWwindow * window)
 {
     glfwSetFramebufferSizeCallback(window, Photographer::FramebufferSizeCallback);
+    glfwSetCursorPosCallback(window, Photographer::MouseCallback);
+    glfwSetScrollCallback(window, Photographer::ScrollCallback);
 }
 
 void Photographer::CleanAndCloseContext()
@@ -261,4 +282,40 @@ void Photographer::ProcessInput(GLFWwindow * window)
 void Photographer::FramebufferSizeCallback(GLFWwindow * window, int width, int height)
 {
     glViewport(0, 0, width, height);
+}
+
+void Photographer::MouseCallback(GLFWwindow * window, double xpos, double ypos)
+{
+    if (first_mouse_)
+    {
+        lastX_ = xpos;
+        lastY_ = ypos;
+        first_mouse_ = false;
+    }
+
+    float xoffset = xpos - lastX_;
+    float yoffset = lastY_ - ypos; // reversed since y-coordinates range from bottom to top
+    lastX_ = xpos;
+    lastY_ = ypos;
+
+    float sensitivity = 0.05f;
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw_ += xoffset;
+    pitch_ += yoffset;
+
+    if (pitch_ > 89.0f) pitch_ = 89.0f;
+    if (pitch_ < -89.0f) pitch_ = -89.0f;
+
+}
+
+void Photographer::ScrollCallback(GLFWwindow * window, double xoffset, double yoffset)
+{
+    if (fov_ >= 1.0f && fov_ <= 45.0f)
+        fov_ -= yoffset;
+    if (fov_ <= 1.0f)
+        fov_ = 1.0f;
+    if (fov_ >= 45.0f)
+        fov_ = 45.0f;
 }
