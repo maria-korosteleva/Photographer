@@ -2,6 +2,7 @@
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
 // It also holds the projection matrix
+// Move rotations to something better
 
 #include <iostream>
 

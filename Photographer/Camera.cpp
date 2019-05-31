@@ -64,7 +64,7 @@ void Camera::UpdateRotation(float delta_pitch, float delta_yaw, bool constrain_p
     delta_yaw *= rotation_sensitivity_;
 
     pitch_ += delta_pitch;
-    yaw_ += delta_yaw;
+    yaw_ = glm::mod(yaw_ + delta_yaw, 360.0f);
 
     if (constrain_pitch)
     {
@@ -89,7 +89,7 @@ void Camera::UpdateCameraRotation()
 {
     // New Front vector
     glm::vec3 front;
-    front.x = cos(glm::radians(yaw_)) * cos(glm::radians(pitch_));
+    front.x = cos(glm::radians(yaw_));
     front.y = sin(glm::radians(pitch_));
     front.z = sin(glm::radians(yaw_)) * cos(glm::radians(pitch_));
     front_ = glm::normalize(front);
