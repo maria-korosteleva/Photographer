@@ -28,7 +28,7 @@ int Photographer::run()
     Photographer::lastY_ = 300;
     first_mouse_ = true;
     camera_ = new Camera(win_width_, win_height_);
-    camera_->SetPosition(glm::vec3(0.0f, 0.0f, 5.0f));
+    camera_->SetPosition(glm::vec3(0.0f, 1.0f, 5.0f));
 
     // setup shaders
     if (shader_ != nullptr) delete shader_;
@@ -36,12 +36,15 @@ int Photographer::run()
     if (light_shader_ != nullptr) delete light_shader_;
     light_shader_ = new Shader(vertex_shader_path_, light_fragment_shader_path_);
 
+    // light
+    light_shader_->use();
+    light_shader_->SetUniform("lightPos", light_position_);
+
     // cube coloring
     shader_->use();
     tex_container_ = LoadTexture(tex_container_path_);
     tex_face_ = LoadTexture(tex_smiley_path_, true);
     shader_->SetUniform("texture2", 1);   // bind the second texture location manually
-    shader_->SetUniform("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
     shader_->SetUniform("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
     last_frame_time_ = glfwGetTime();
@@ -51,7 +54,7 @@ int Photographer::run()
         this->ProcessInput(window);
 
         // Backgournd render commands
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // state-setting function
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);   // state-setting function
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);       // state-using function
 
         //----- Light cube
@@ -145,11 +148,14 @@ void Photographer::CreateObjectVAO()
 
     // Vertex data interpretation guide
     // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    // texture coordinates
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    // normals
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    // texture coordinates
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     // ------ Light object
     glGenVertexArrays(1, &light_vertex_array_);
@@ -157,7 +163,7 @@ void Photographer::CreateObjectVAO()
 
     glBindBuffer(GL_ARRAY_BUFFER, object_vertex_buffer_);
     // interptrtation guide -- vertices only
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     // Cleaning. Unbinding is not necessary, but I'm doing this for completeness
