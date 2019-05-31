@@ -27,12 +27,24 @@ int Photographer::run()
     shader_program_->SetUniform("texture2", 1);   // bind the second texture location manually
 
     // going 3D
-    glm::mat4 view = glm::mat4(1.0f);
-    // note that we're translating the scene in the reverse direction of where we want to move
-    view = glm::translate(view, glm::vec3(0.0f, -1.0f, -10.0f));
     glm::mat4 projection;
     projection = glm::perspective(glm::radians(45.0f), win_width_ / win_height_, 0.1f, 100.0f);
+
+    // camera
+    glm::vec3 camera_pos = glm::vec3(0.0f, 0.0f, 3.0f);
     
+    glm::vec3 camera_target = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 camera_reverse_direction = glm::normalize(camera_pos - camera_target); // reverse direction
+    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); // up guess -- results in relatively up camera
+    glm::vec3 camera_right = glm::normalize(glm::cross(up, camera_reverse_direction));
+    //glm::vec3 camera_up = glm::normalize(glm::cross(camera_reverse_direction, camera_right));
+
+    glm::vec3 camera_front = glm::vec3(0.0f, 0.0f, -1.0f);
+    glm::vec3 camera_up = up;
+
+    //glm::mat4 view;
+    //view = glm::lookAt(camera_pos, camera_target, up);
+
     glBindVertexArray(this->object_vertex_array_);
 
     while (!glfwWindowShouldClose(window))
@@ -52,8 +64,15 @@ int Photographer::run()
         shader_program_->SetUniform("mix_value", texture_mix_rate_);
 
         // projection
-        shader_program_->SetUniform("view", view);
         shader_program_->SetUniform("projection", projection);
+
+        float radius = 10.0f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
+        camera_pos = glm::vec3(camX, 0.0, camZ);
+        glm::mat4 view;
+        view = glm::lookAt(camera_pos, camera_pos + camera_front, camera_up);
+        shader_program_->SetUniform("view", view);
 
         // draw cubes
         for (int i = 0; i < num_cubes_; ++i)
