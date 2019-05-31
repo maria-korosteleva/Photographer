@@ -30,23 +30,8 @@ int Photographer::run()
     glm::mat4 projection;
     projection = glm::perspective(glm::radians(45.0f), win_width_ / win_height_, 0.1f, 100.0f);
 
-    // camera
-    glm::vec3 camera_pos = glm::vec3(0.0f, 0.0f, 3.0f);
-    
-    glm::vec3 camera_target = glm::vec3(0.0f, 0.0f, 0.0f);
-    glm::vec3 camera_reverse_direction = glm::normalize(camera_pos - camera_target); // reverse direction
-    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f); // up guess -- results in relatively up camera
-    glm::vec3 camera_right = glm::normalize(glm::cross(up, camera_reverse_direction));
-    //glm::vec3 camera_up = glm::normalize(glm::cross(camera_reverse_direction, camera_right));
-
-    glm::vec3 camera_front = glm::vec3(0.0f, 0.0f, -1.0f);
-    glm::vec3 camera_up = up;
-
-    //glm::mat4 view;
-    //view = glm::lookAt(camera_pos, camera_target, up);
-
     glBindVertexArray(this->object_vertex_array_);
-
+    last_frame_time_ = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
         // TUTORIAL input
@@ -66,12 +51,9 @@ int Photographer::run()
         // projection
         shader_program_->SetUniform("projection", projection);
 
-        float radius = 10.0f;
-        float camX = sin(glfwGetTime()) * radius;
-        float camZ = cos(glfwGetTime()) * radius;
-        camera_pos = glm::vec3(camX, 0.0, camZ);
+        // camera
         glm::mat4 view;
-        view = glm::lookAt(camera_pos, camera_pos + camera_front, camera_up);
+        view = glm::lookAt(camera_pos_, camera_pos_ + camera_front_, camera_up_);
         shader_program_->SetUniform("view", view);
 
         // draw cubes
@@ -96,6 +78,11 @@ int Photographer::run()
         // swap the buffers and check all call events
         glfwSwapBuffers(window);
         glfwPollEvents();
+
+        // rendering time
+        float currentFrame = glfwGetTime();
+        delta_time_ = currentFrame - last_frame_time_;
+        last_frame_time_ = currentFrame;
     }
 
     CleanAndCloseContext();
@@ -258,6 +245,17 @@ void Photographer::ProcessInput(GLFWwindow * window)
         if (texture_mix_rate_ < 0.0f) texture_mix_rate_ = 0.0;
         shader_program_->SetUniform("mix_rate", texture_mix_rate_);
     }
+
+    // camera control
+    float cameraSpeed = 2.5f * delta_time_; // adjust accordingly
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        camera_pos_ += cameraSpeed * camera_front_;
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        camera_pos_ -= cameraSpeed * camera_front_;
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        camera_pos_ -= glm::normalize(glm::cross(camera_front_, camera_up_)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        camera_pos_ += glm::normalize(glm::cross(camera_front_, camera_up_)) * cameraSpeed;
 }
 
 void Photographer::FramebufferSizeCallback(GLFWwindow * window, int width, int height)

@@ -53,7 +53,16 @@ private:
     float texture_mix_rate_ = 0.2;
     float win_width_ = 800;
     float win_height_ = 600;
+
+    // TUTORIAL camera
+    glm::vec3 camera_pos_ = glm::vec3(0.0f, 0.0f, 3.0f);
+    glm::vec3 camera_front_ = glm::vec3(0.0f, 0.0f, -3.0f);
+    glm::vec3 camera_up_ = glm::vec3(0.0f, 1.0f, 0.0f);
     
+    // keep track of rendering speed for camera speed adjustment
+    float delta_time_ = 0.0f;	// Time between current frame and last frame
+    float last_frame_time_ = 0.0f; // Time of last frame
+
     // data from tutorial
     // triangle in Normalized Device Coordinates
     static constexpr const char* const tex_container_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Textures/container.jpg";
