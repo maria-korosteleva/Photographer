@@ -44,6 +44,7 @@ private:
     static constexpr float default_fov_ = 45.0f;
     // TUTORIAL
     static constexpr float rotation_sensitivity_ = 0.05f;
+    static constexpr float zoom_sensitivity_ = 0.01f;
     static constexpr float movement_speed_ = 2.5f;
 
     // Calculates the front vector from the Camera's (updated) Euler Angles

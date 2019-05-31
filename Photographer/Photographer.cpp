@@ -23,45 +23,66 @@ int Photographer::run()
     
     CreateObjectVAO();
 
-    tex_container_ = LoadTexture(tex_container_path_);
-    tex_face_ = LoadTexture(tex_smiley_path_, true);
-
-    if (shader_program_ != nullptr) delete shader_program_;
-    shader_program_ = new Shader(vertex_shader_path_, fragment_shader_path_);
-    shader_program_->use();
-    shader_program_->SetUniform("texture2", 1);   // bind the second texture location manually
-
-    // going 3D
+    // Setup camera
     Photographer::lastX_ = 400;
     Photographer::lastY_ = 300;
     first_mouse_ = true;
     camera_ = new Camera(win_width_, win_height_);
-    camera_->SetPosition(glm::vec3(0.0f, 0.0f, 3.0f));
+    camera_->SetPosition(glm::vec3(0.0f, 0.0f, 5.0f));
 
-    glBindVertexArray(this->object_vertex_array_);
+    // setup shaders
+    if (shader_ != nullptr) delete shader_;
+    shader_ = new Shader(vertex_shader_path_, fragment_shader_path_);
+    if (light_shader_ != nullptr) delete light_shader_;
+    light_shader_ = new Shader(vertex_shader_path_, light_fragment_shader_path_);
+
+    // cube coloring
+    shader_->use();
+    tex_container_ = LoadTexture(tex_container_path_);
+    tex_face_ = LoadTexture(tex_smiley_path_, true);
+    shader_->SetUniform("texture2", 1);   // bind the second texture location manually
+    shader_->SetUniform("objectColor", glm::vec3(1.0f, 0.5f, 0.31f));
+    shader_->SetUniform("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+
     last_frame_time_ = glfwGetTime();
     while (!glfwWindowShouldClose(window))
     {
         // TUTORIAL input
         this->ProcessInput(window);
 
-        // render commands
+        // Backgournd render commands
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);   // state-setting function
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);       // state-using function
-        
+
+        //----- Light cube
+        light_shader_->use();
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, light_position_);
+        model = glm::scale(model, glm::vec3(0.2f));
+        light_shader_->SetUniform("model", model);
+        // camera
+        light_shader_->SetUniform("view", camera_->GetGlViewMatrix());
+        light_shader_->SetUniform("projection", camera_->GetGlProjectionMatrix());
+        // draw
+        glBindVertexArray(light_vertex_array_);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // ----- Main cube
+        shader_->use();
         // TUTORIAL bind textures
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, tex_container_);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, tex_face_);
-        shader_program_->SetUniform("mix_value", texture_mix_rate_);
+        shader_->SetUniform("mix_value", texture_mix_rate_);
 
         // camera
-        shader_program_->SetUniform("view", camera_->GetGlViewMatrix());
-        shader_program_->SetUniform("projection", camera_->GetGlProjectionMatrix());
+        shader_->SetUniform("view", camera_->GetGlViewMatrix());
+        shader_->SetUniform("projection", camera_->GetGlProjectionMatrix());
 
         // draw cubes
-        for (int i = 0; i < num_cubes_; ++i)
+        glBindVertexArray(this->object_vertex_array_);
+        for (int i = 0; i < 1; ++i)
         {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cube_positions_[i]);
@@ -74,11 +95,12 @@ int Photographer::run()
                 float angle = 20.0f * i;
                 model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
             }
-            shader_program_->SetUniform("model", model);
+            shader_->SetUniform("model", model);
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
         //glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
         
+        // ----- finish
         // swap the buffers and check all call events
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -97,6 +119,7 @@ void Photographer::CreateObjectVAO()
 {
     // id avalibility check
     if (object_vertex_array_ > 0
+        || light_vertex_array_ >0 
         || object_vertex_buffer_ > 0
         || object_element_buffer_ > 0)
     {
@@ -104,6 +127,7 @@ void Photographer::CreateObjectVAO()
         std::cout << "ERROR::CREATE OBJECT BUFFERS::OBJECT BUFFERS WERE ALREADY ALLOCATED. DATA IS LOST\n" << std::endl;
     }
 
+    // ------ Main (cube) object
     // VAO allows storing the vertex attribures as an object for easy loading after
     glGenVertexArrays(1, &object_vertex_array_);
     glBindVertexArray(object_vertex_array_);
@@ -126,6 +150,15 @@ void Photographer::CreateObjectVAO()
     // texture coordinates
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+
+    // ------ Light object
+    glGenVertexArrays(1, &light_vertex_array_);
+    glBindVertexArray(light_vertex_array_);
+
+    glBindBuffer(GL_ARRAY_BUFFER, object_vertex_buffer_);
+    // interptrtation guide -- vertices only
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
 
     // Cleaning. Unbinding is not necessary, but I'm doing this for completeness
     // Important to unbind GL_ELEMENT_ARRAY_BUFFER after Vertex Array
@@ -229,11 +262,11 @@ void Photographer::CleanAndCloseContext()
     glDeleteBuffers(1, &object_element_buffer_);
     glDeleteTextures(1, &tex_container_);
     glDeleteTextures(1, &tex_face_);
-    delete shader_program_;
+    delete shader_;
     delete camera_;
     glfwTerminate();
 
-    shader_program_ = nullptr;
+    shader_ = nullptr;
     camera_ = nullptr;
     object_vertex_array_ = object_element_buffer_ = object_vertex_buffer_ = tex_container_ = tex_face_ = 0;
 }
@@ -248,13 +281,13 @@ void Photographer::ProcessInput(GLFWwindow * window)
     {
         texture_mix_rate_ += 0.02;
         if (texture_mix_rate_ > 1.0f) texture_mix_rate_ = 1.0;
-        shader_program_->SetUniform("mix_rate", texture_mix_rate_);
+        shader_->SetUniform("mix_rate", texture_mix_rate_);
     }
     if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
     {
         texture_mix_rate_ -= 0.02;
         if (texture_mix_rate_ < 0.0f) texture_mix_rate_ = 0.0;
-        shader_program_->SetUniform("mix_rate", texture_mix_rate_);
+        shader_->SetUniform("mix_rate", texture_mix_rate_);
     }
 
     // camera control

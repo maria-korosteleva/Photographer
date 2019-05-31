@@ -78,7 +78,7 @@ void Camera::UpdateRotation(float delta_pitch, float delta_yaw, bool constrain_p
 void Camera::Zoom(float delta)
 {
     if (field_of_view_ >= 1.0f && field_of_view_ <= default_fov_)
-        field_of_view_ -= delta;
+        field_of_view_ -= zoom_sensitivity_ * delta;
 
     // check boundaries
     if (field_of_view_ <= 1.0f)             field_of_view_ = 1.0f;

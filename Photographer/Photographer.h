@@ -35,6 +35,7 @@ public:
 private:
     static constexpr const char* const vertex_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/VertexShader.glsl";
     static constexpr const char const * fragment_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/FragmentShader.glsl";
+    static constexpr const char const * light_fragment_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/LightFragmentShader.glsl";
     // functions
     void CreateObjectVAO();
     unsigned int LoadTexture(const char * filename, bool alpha = false);
@@ -52,20 +53,24 @@ private:
 
     // running ids
     unsigned int object_vertex_array_ = 0;
+    unsigned int light_vertex_array_ = 0;
     unsigned int object_vertex_buffer_ = 0;
     unsigned int object_element_buffer_ = 0;
     unsigned int tex_container_ = 0;
     unsigned int tex_face_ = 0;
     
     // tools
-    Shader* shader_program_ = nullptr;
+    Shader* shader_ = nullptr;
+    Shader* light_shader_ = nullptr;
     static Camera* camera_;
-
 
     // appearence control
     float texture_mix_rate_ = 0.2;
     float win_width_ = 800;
     float win_height_ = 600;
+
+    // lighting
+    glm::vec3 light_position_ = glm::vec3(1.2f, 1.0f, 2.0f);
     
     // TUTORIAL keep track of rendering speed for camera speed adjustment
     float delta_time_ = 0.0f;	// Time between current frame and last frame

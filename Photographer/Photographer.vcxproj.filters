@@ -55,5 +55,8 @@
     <None Include="Shaders\FragmentShader.glsl">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="Shaders\LightFragmentShader.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
