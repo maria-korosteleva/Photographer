@@ -21,30 +21,20 @@ int Photographer::run()
     GLFWwindow* window = InitWindowContext();
     RegisterCallbacks(window);
     
+    // Setup the scene
     CreateObjectVAO();
+    InitShadersLightColor();
 
     // Setup camera
-    Photographer::lastX_ = 400;
-    Photographer::lastY_ = 300;
-    first_mouse_ = true;
     camera_ = new Camera(win_width_, win_height_);
     camera_->SetPosition(glm::vec3(0.0f, 1.0f, 5.0f));
 
-    // setup shaders
-    if (shader_ != nullptr) delete shader_;
-    shader_ = new Shader(vertex_shader_path_, fragment_shader_path_);
-    if (light_shader_ != nullptr) delete light_shader_;
-    light_shader_ = new Shader(vertex_shader_path_, light_fragment_shader_path_);
-
-    // cube coloring
-    shader_->use();
-    tex_container_ = LoadTexture(tex_container_path_);
-    tex_face_ = LoadTexture(tex_smiley_path_, true);
-    shader_->SetUniform("texture2", 1);   // bind the second texture location manually
-    shader_->SetUniform("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-    shader_->SetUniform("lightPos", light_position_);
-
+    // operating the view
+    Photographer::lastX_ = 400;
+    Photographer::lastY_ = 300;
+    first_mouse_ = true;
     last_frame_time_ = glfwGetTime();
+
     while (!glfwWindowShouldClose(window))
     {
         // TUTORIAL input
@@ -54,53 +44,10 @@ int Photographer::run()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);   // state-setting function
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);       // state-using function
 
-        //----- Light cube
-        light_shader_->use();
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, light_position_);
-        model = glm::scale(model, glm::vec3(0.2f));
-        light_shader_->SetUniform("model", model);
-        // camera
-        light_shader_->SetUniform("view", camera_->GetGlViewMatrix());
-        light_shader_->SetUniform("projection", camera_->GetGlProjectionMatrix());
-        // draw
-        glBindVertexArray(light_vertex_array_);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        // Draw
+        DrawLightCube();
+        DrawMainObjects();
 
-        // ----- Main cube
-        shader_->use();
-        // TUTORIAL bind textures
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, tex_container_);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, tex_face_);
-        shader_->SetUniform("mix_value", texture_mix_rate_);
-
-        // camera
-        shader_->SetUniform("view", camera_->GetGlViewMatrix());
-        shader_->SetUniform("projection", camera_->GetGlProjectionMatrix());
-
-        // draw cubes
-        glBindVertexArray(this->object_vertex_array_);
-
-        for (int i = 0; i < num_cubes_; ++i)
-        {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cube_positions_[i]);
-            if (i % 3 == 0)
-            {
-                model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
-            }
-            else
-            {
-                float angle = 20.0f * i;
-                model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
-            }
-            shader_->SetUniform("model", model);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-        //glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
-        
         // ----- finish
         // swap the buffers and check all call events
         glfwSwapBuffers(window);
@@ -209,6 +156,80 @@ unsigned int Photographer::LoadTexture(const char * filename, bool alpha)
     stbi_image_free(tex_data);
 
     return texture;
+}
+
+void Photographer::InitShadersLightColor()
+{
+    if (shader_ != nullptr) delete shader_;
+    shader_ = new Shader(vertex_shader_path_, fragment_shader_path_);
+    if (light_shader_ != nullptr) delete light_shader_;
+    light_shader_ = new Shader(vertex_shader_path_, light_fragment_shader_path_);
+
+    // light position doesn't change
+    light_shader_->use();
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, light_position_);
+    model = glm::scale(model, glm::vec3(0.2f));
+    light_shader_->SetUniform("model", model);
+
+    // cube coloring
+    shader_->use();
+    tex_container_ = LoadTexture(tex_container_path_);
+    tex_face_ = LoadTexture(tex_smiley_path_, true);
+    shader_->SetUniform("texture2", 1);   // bind the second texture location manually
+    shader_->SetUniform("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    shader_->SetUniform("lightPos", light_position_);
+}
+
+void Photographer::DrawLightCube()
+{
+    light_shader_->use();
+
+    // camera -- could change
+    light_shader_->SetUniform("view", camera_->GetGlViewMatrix());
+    light_shader_->SetUniform("projection", camera_->GetGlProjectionMatrix());
+
+    // draw
+    glBindVertexArray(light_vertex_array_);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
+}
+
+void Photographer::DrawMainObjects()
+{
+    shader_->use();
+
+    // TUTORIAL bind textures
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, tex_container_);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, tex_face_);
+    shader_->SetUniform("mix_value", texture_mix_rate_);
+
+    // camera
+    shader_->SetUniform("view", camera_->GetGlViewMatrix());
+    shader_->SetUniform("projection", camera_->GetGlProjectionMatrix());
+
+    // draw cubes
+    glBindVertexArray(this->object_vertex_array_);
+
+    for (int i = 0; i < num_cubes_; ++i)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, cube_positions_[i]);
+        if (i % 3 == 0)
+        {
+            model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
+        }
+        else
+        {
+            float angle = 20.0f * i;
+            model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
+        }
+        shader_->SetUniform("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
+    //glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
+
 }
 
 GLFWwindow* Photographer::InitWindowContext()
