@@ -49,6 +49,18 @@ int Photographer::run()
         light_position_.x = radius * sin(glfwGetTime());
         light_position_.z = radius * cos(glfwGetTime());
 
+        // change light coloring 
+        glm::vec3 light_color;
+        light_color.x = sin(glfwGetTime() * 2.0f);
+        light_color.y = sin(glfwGetTime() * 0.7f);
+        light_color.z = sin(glfwGetTime() * 1.3f);
+
+        glm::vec3 diffuse_color = light_color * glm::vec3(0.5f); // decrease the influence
+        glm::vec3 ambient_color = diffuse_color * glm::vec3(0.2f); // low influence
+
+        shader_->SetUniform("light.ambient", ambient_color);
+        shader_->SetUniform("light.diffuse", diffuse_color);
+
         // Draw
         DrawLightCube();
         DrawMainObjects();
@@ -174,9 +186,17 @@ void Photographer::InitShadersLightColor()
     shader_->use();
     tex_container_ = LoadTexture(tex_container_path_);
     tex_face_ = LoadTexture(tex_smiley_path_, true);
-    shader_->SetUniform("texture2", 1);   // bind the second texture location manually
-    shader_->SetUniform("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
-    shader_->SetUniform("lightPos", light_position_);
+    shader_->SetUniform("material.texture2", 1);   // bind the second texture location manually
+    shader_->SetUniform("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+    shader_->SetUniform("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+    shader_->SetUniform("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+    shader_->SetUniform("material.shininess", 32.0f);
+
+    // Illumination properties
+    shader_->SetUniform("light.position", light_position_);
+    shader_->SetUniform("light.ambient", glm::vec3(0.2f));
+    shader_->SetUniform("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+    shader_->SetUniform("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
 void Photographer::DrawLightCube()
@@ -207,7 +227,7 @@ void Photographer::DrawMainObjects()
     glBindTexture(GL_TEXTURE_2D, tex_container_);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, tex_face_);
-    shader_->SetUniform("mix_value", texture_mix_rate_);
+    shader_->SetUniform("material.mix_value", texture_mix_rate_);
 
     // camera
     shader_->SetUniform("view", camera_->GetGlViewMatrix());
@@ -215,7 +235,7 @@ void Photographer::DrawMainObjects()
     shader_->SetUniform("eyePos", camera_->position());
 
     // light
-    shader_->SetUniform("lightPos", light_position_);
+    shader_->SetUniform("light.position", light_position_);
 
     // draw cubes
     glBindVertexArray(this->object_vertex_array_);
