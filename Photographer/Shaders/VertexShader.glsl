@@ -8,6 +8,7 @@ out vec3 Normal;
 out vec3 FragPosition;  // in world coordinates
 
 uniform mat4 model;
+uniform mat4 normalMatrix;
 uniform mat4 view;
 uniform mat4 projection;
 
@@ -17,9 +18,8 @@ void main()
     FragPosition = vec3(model * vec4(aPos, 1.0));
     TexCoord = aTexCoord;
 
-    // avoid scaling issues
-    // TODO move Normal matrix to the uniforms for a more efficient implementation
-    Normal = mat3(transpose(inverse(model))) *  aNormal;
+    // avoid scaling issues. Equivalent to vector transformation
+    Normal = mat3(normalMatrix) * aNormal;
 
     // final coordinates
     gl_Position = projection * view * vec4(FragPosition, 1.0);

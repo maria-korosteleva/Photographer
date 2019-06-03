@@ -226,6 +226,7 @@ void Photographer::DrawMainObjects()
             model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
         }
         shader_->SetUniform("model", model);
+        shader_->SetUniform("normalMatrix", glm::transpose(glm::inverse(model)));
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
     //glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
