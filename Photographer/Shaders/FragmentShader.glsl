@@ -12,6 +12,7 @@ uniform float mix_value;
 
 uniform vec3 lightColor;
 uniform vec3 lightPos;
+uniform vec3 eyePos;
 
 void main()
 {
@@ -25,11 +26,19 @@ void main()
     // diffuse
     vec3 norm = normalize(Normal);
     vec3 lightDir = normalize(lightPos - FragPosition);
-    float diff_strength = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diff_strength * lightColor;
+    float diffStrength = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = diffStrength * lightColor;
+
+    // specular
+    float specularWeight = 0.8;
+    int shininess = 128;
+    // TODO efficient calculation through approximation
+    vec3 viewDir = normalize(eyePos - FragPosition);
+    vec3 reflectDir = reflect(-lightDir, norm);
+    float specularStrength = specularWeight * pow(max(dot(norm, reflectDir), 0.0), shininess);
+    vec3 specular = specularStrength * lightColor;
 
     // all light components together
-    vec3 result = (diffuse + ambient) * objColor.xyz;
-    //vec3 result = diffuse;
+    vec3 result = (diffuse + ambient + specular) * objColor.xyz;
     FragColor = vec4(result, 1.0);
 }

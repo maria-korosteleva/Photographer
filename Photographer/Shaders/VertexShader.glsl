@@ -17,7 +17,6 @@ void main()
     // info for fragment shader
     FragPosition = vec3(model * vec4(aPos, 1.0));
     TexCoord = aTexCoord;
-
     // avoid scaling issues. Equivalent to vector transformation
     Normal = mat3(normalMatrix) * aNormal;
 

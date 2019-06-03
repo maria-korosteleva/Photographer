@@ -44,6 +44,11 @@ int Photographer::run()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);   // state-setting function
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);       // state-using function
 
+        // move light 
+        float radius = 2;
+        light_position_.x = radius * sin(glfwGetTime());
+        light_position_.z = radius * cos(glfwGetTime());
+
         // Draw
         DrawLightCube();
         DrawMainObjects();
@@ -165,13 +170,6 @@ void Photographer::InitShadersLightColor()
     if (light_shader_ != nullptr) delete light_shader_;
     light_shader_ = new Shader(vertex_shader_path_, light_fragment_shader_path_);
 
-    // light position doesn't change
-    light_shader_->use();
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, light_position_);
-    model = glm::scale(model, glm::vec3(0.2f));
-    light_shader_->SetUniform("model", model);
-
     // cube coloring
     shader_->use();
     tex_container_ = LoadTexture(tex_container_path_);
@@ -184,6 +182,12 @@ void Photographer::InitShadersLightColor()
 void Photographer::DrawLightCube()
 {
     light_shader_->use();
+
+    // light position changes
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, light_position_);
+    model = glm::scale(model, glm::vec3(0.2f));
+    light_shader_->SetUniform("model", model);
 
     // camera -- could change
     light_shader_->SetUniform("view", camera_->GetGlViewMatrix());
@@ -208,6 +212,10 @@ void Photographer::DrawMainObjects()
     // camera
     shader_->SetUniform("view", camera_->GetGlViewMatrix());
     shader_->SetUniform("projection", camera_->GetGlProjectionMatrix());
+    shader_->SetUniform("eyePos", camera_->position());
+
+    // light
+    shader_->SetUniform("lightPos", light_position_);
 
     // draw cubes
     glBindVertexArray(this->object_vertex_array_);
