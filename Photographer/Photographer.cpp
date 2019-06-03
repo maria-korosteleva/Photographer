@@ -57,7 +57,7 @@ int Photographer::run()
 
         glm::vec3 diffuse_color = light_color * glm::vec3(0.5f); // decrease the influence
         glm::vec3 ambient_color = diffuse_color * glm::vec3(0.2f); // low influence
-
+        shader_->use();
         shader_->SetUniform("light.ambient", ambient_color);
         shader_->SetUniform("light.diffuse", diffuse_color);
 
