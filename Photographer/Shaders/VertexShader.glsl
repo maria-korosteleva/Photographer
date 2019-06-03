@@ -13,9 +13,14 @@ uniform mat4 projection;
 
 void main()
 {
-    gl_Position = projection * view * model * vec4(aPos.x, aPos.y, aPos.z, 1.0);
     // info for fragment shader
     FragPosition = vec3(model * vec4(aPos, 1.0));
     TexCoord = aTexCoord;
-    Normal = aNormal;
+
+    // avoid scaling issues
+    // TODO move Normal matrix to the uniforms for a more efficient implementation
+    Normal = mat3(transpose(inverse(model))) *  aNormal;
+
+    // final coordinates
+    gl_Position = projection * view * vec4(FragPosition, 1.0);
 }

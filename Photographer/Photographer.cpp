@@ -36,16 +36,13 @@ int Photographer::run()
     if (light_shader_ != nullptr) delete light_shader_;
     light_shader_ = new Shader(vertex_shader_path_, light_fragment_shader_path_);
 
-    // light
-    light_shader_->use();
-    light_shader_->SetUniform("lightPos", light_position_);
-
     // cube coloring
     shader_->use();
     tex_container_ = LoadTexture(tex_container_path_);
     tex_face_ = LoadTexture(tex_smiley_path_, true);
     shader_->SetUniform("texture2", 1);   // bind the second texture location manually
     shader_->SetUniform("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    shader_->SetUniform("lightPos", light_position_);
 
     last_frame_time_ = glfwGetTime();
     while (!glfwWindowShouldClose(window))
@@ -85,7 +82,8 @@ int Photographer::run()
 
         // draw cubes
         glBindVertexArray(this->object_vertex_array_);
-        for (int i = 0; i < 1; ++i)
+
+        for (int i = 0; i < num_cubes_; ++i)
         {
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, cube_positions_[i]);
