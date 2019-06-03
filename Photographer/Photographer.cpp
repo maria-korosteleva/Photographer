@@ -49,18 +49,6 @@ int Photographer::run()
         light_position_.x = radius * sin(glfwGetTime());
         light_position_.z = radius * cos(glfwGetTime());
 
-        // change light coloring 
-        glm::vec3 light_color;
-        light_color.x = sin(glfwGetTime() * 2.0f);
-        light_color.y = sin(glfwGetTime() * 0.7f);
-        light_color.z = sin(glfwGetTime() * 1.3f);
-
-        glm::vec3 diffuse_color = light_color * glm::vec3(0.5f); // decrease the influence
-        glm::vec3 ambient_color = diffuse_color * glm::vec3(0.2f); // low influence
-        shader_->use();
-        shader_->SetUniform("light.ambient", ambient_color);
-        shader_->SetUniform("light.diffuse", diffuse_color);
-
         // Draw
         DrawLightCube();
         DrawMainObjects();
@@ -185,12 +173,10 @@ void Photographer::InitShadersLightColor()
     // cube coloring
     shader_->use();
     tex_container_ = LoadTexture(tex_container_path_);
-    tex_face_ = LoadTexture(tex_smiley_path_, true);
-    shader_->SetUniform("material.texture2", 1);   // bind the second texture location manually
-    shader_->SetUniform("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-    shader_->SetUniform("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-    shader_->SetUniform("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-    shader_->SetUniform("material.shininess", 32.0f);
+    tex_steel_border_ = LoadTexture(tex_steel_border_path_, true);
+    shader_->SetUniform("material.diffuse", 0);   // bind the first texture as a diffuse map
+    shader_->SetUniform("material.specular", 1);   // bind the second texture as a specular map
+    shader_->SetUniform("material.shininess", 128.0f);
 
     // Illumination properties
     shader_->SetUniform("light.position", light_position_);
@@ -226,8 +212,7 @@ void Photographer::DrawMainObjects()
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, tex_container_);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, tex_face_);
-    shader_->SetUniform("material.mix_value", texture_mix_rate_);
+    glBindTexture(GL_TEXTURE_2D, tex_steel_border_);
 
     // camera
     shader_->SetUniform("view", camera_->GetGlViewMatrix());
@@ -330,18 +315,6 @@ void Photographer::ProcessInput(GLFWwindow * window)
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
         glfwSetWindowShouldClose(window, true);
-    }
-    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-    {
-        texture_mix_rate_ += 0.02;
-        if (texture_mix_rate_ > 1.0f) texture_mix_rate_ = 1.0;
-        shader_->SetUniform("mix_rate", texture_mix_rate_);
-    }
-    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-    {
-        texture_mix_rate_ -= 0.02;
-        if (texture_mix_rate_ < 0.0f) texture_mix_rate_ = 0.0;
-        shader_->SetUniform("mix_rate", texture_mix_rate_);
     }
 
     // camera control

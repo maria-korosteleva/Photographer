@@ -66,6 +66,7 @@ private:
     unsigned int object_element_buffer_ = 0;
     unsigned int tex_container_ = 0;
     unsigned int tex_face_ = 0;
+    unsigned int tex_steel_border_ = 0;
     
     // tools
     Shader* shader_ = nullptr;
@@ -73,7 +74,6 @@ private:
     static Camera* camera_;
 
     // appearence control
-    float texture_mix_rate_ = 0.2;
     float win_width_ = 800;
     float win_height_ = 600;
 
@@ -88,6 +88,7 @@ private:
     // triangle in Normalized Device Coordinates
     static constexpr const char* const tex_container_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Textures/container.jpg";
     static constexpr const char* const tex_smiley_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Textures/awesomeface.png";
+    static constexpr const char* const tex_steel_border_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Textures/container2_specular.png";
 
     static const std::size_t  kTriangleArrSize = 9;
     float triangle_verts_[kTriangleArrSize] = {
