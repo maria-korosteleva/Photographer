@@ -174,8 +174,9 @@ void Photographer::InitShadersLightColor()
     shader_->use();
     tex_container_ = LoadTexture(tex_container_path_);
     tex_steel_border_ = LoadTexture(tex_steel_border_path_, true);
+    tex_face_ = LoadTexture(tex_smiley_path_, true);
     shader_->SetUniform("material.diffuse", 0);   // bind the first texture as a diffuse map
-    shader_->SetUniform("material.specular", 1);   // bind the second texture as a specular map
+    shader_->SetUniform("material.specular", 2);   // bind the second texture as a specular map
     shader_->SetUniform("material.shininess", 128.0f);
 
     // Illumination properties
@@ -211,8 +212,8 @@ void Photographer::DrawMainObjects()
     // TUTORIAL bind textures
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, tex_container_);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, tex_steel_border_);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, tex_face_);
 
     // camera
     shader_->SetUniform("view", camera_->GetGlViewMatrix());
