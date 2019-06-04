@@ -6,7 +6,7 @@ struct Material {
 };
 
 struct Light {
-    vec3 position;
+    vec4 direction; // direction from the light source (point or directional)
 
     vec3 ambient;   // control the intensity
     vec3 diffuse;   // main light color
@@ -33,7 +33,16 @@ void main()
 
     // diffuse
     vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(light.position - FragPosition);
+    vec3 lightDir;
+    if (light.direction.w > 0.0)
+    { // point light
+        lightDir = normalize(vec3(light.direction) - FragPosition);
+    }     
+    else 
+    { // directional light
+        lightDir = normalize(-vec3(light.direction));
+    }
+
     float diffStrength = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diffStrength * light.diffuse * vec3(texture(material.diffuse, TexCoord));
 

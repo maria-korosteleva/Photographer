@@ -71,6 +71,12 @@ void Shader::SetUniform(const std::string & name, glm::vec3 value) const
     glUniform3fv(location, 1, glm::value_ptr(value));
 }
 
+void Shader::SetUniform(const std::string & name, glm::vec4 value) const
+{
+    unsigned int location = glGetUniformLocation(ID_, name.c_str());
+    glUniform4fv(location, 1, glm::value_ptr(value));
+}
+
 void Shader::CreateProgram(unsigned int vertex_shader, unsigned int fragment_shader)
 {
     // link shaders
