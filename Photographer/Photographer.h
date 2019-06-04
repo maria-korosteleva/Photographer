@@ -43,7 +43,7 @@ private:
     void InitShadersLightColor();
 
     // called every frame
-    void DrawLightCube();
+    void DrawLightCubes();
     void DrawMainObjects();
 
     // context set-up
@@ -78,7 +78,14 @@ private:
     float win_height_ = 600;
 
     // lighting
-    glm::vec3 light_position_ = glm::vec3(1.2f, 1.0f, 2.0f);
+    glm::vec3 dir_light_ = glm::vec3(-0.2f, -1.0f, -0.3f);
+    static const std::size_t kPointLights = 4;
+    glm::vec3 point_light_positions_[kPointLights] = {
+        glm::vec3(0.7f,  0.2f,  2.0f),
+        glm::vec3(2.3f, -3.3f, -4.0f),
+        glm::vec3(-4.0f,  2.0f, -12.0f),
+        glm::vec3(0.0f,  0.0f, -3.0f)
+    };
     
     // TUTORIAL keep track of rendering speed for camera speed adjustment
     float delta_time_ = 0.0f;	// Time between current frame and last frame

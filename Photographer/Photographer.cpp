@@ -45,12 +45,12 @@ int Photographer::run()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);       // state-using function
 
         // move light 
-        float radius = 2;
-        light_position_.x = radius * sin(glfwGetTime());
-        light_position_.z = radius * cos(glfwGetTime());
+        //float radius = 2;
+        //dir_light_.x = radius * sin(glfwGetTime());
+        //dir_light_.z = radius * cos(glfwGetTime());
 
         // Draw
-        DrawLightCube();
+        DrawLightCubes();
         DrawMainObjects();
 
         // ----- finish
@@ -180,37 +180,58 @@ void Photographer::InitShadersLightColor()
     shader_->SetUniform("material.shininess",   128.0f);
 
     // Illumination properties
+    // directional
+    shader_->SetUniform("directional_light.direction", dir_light_);
+    shader_->SetUniform("directional_light.ambient", glm::vec3(0.2f));
+    shader_->SetUniform("directional_light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+    shader_->SetUniform("directional_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
+    // point lights
+    for (int i = 0; i < kPointLights; ++i)
+    {
+        std::string name = "point_lights[";
+        name += std::to_string(i) + ']';
+
+        shader_->SetUniform(name + ".position", point_light_positions_[i]);
+
+        shader_->SetUniform(name + ".ambient", glm::vec3(0.2f));
+        shader_->SetUniform(name + ".diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+        shader_->SetUniform(name + ".specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
+        shader_->SetUniform(name + ".attenuation_constant", 1.0f);
+        shader_->SetUniform(name + ".attenuation_linear", 0.09f);
+        shader_->SetUniform(name + ".attenuation_quadratic", 0.032f);
+    }
+
     // spotlight properties
-    //shader_->SetUniform("light.direction",  glm::vec3(light_position_));
-    shader_->SetUniform("light.cut_off", glm::cos(glm::radians(12.5f)));
-    shader_->SetUniform("light.outer_cut_off", glm::cos(glm::radians(18.0f)));
+    // positions and directions are defined on the go
+    shader_->SetUniform("spot_light.cut_off", glm::cos(glm::radians(12.5f)));
+    shader_->SetUniform("spot_light.outer_cut_off", glm::cos(glm::radians(18.0f)));
     // color components
-    shader_->SetUniform("light.ambient",    glm::vec3(0.2f));
-    shader_->SetUniform("light.diffuse",    glm::vec3(0.5f, 0.5f, 0.5f));
-    shader_->SetUniform("light.specular",   glm::vec3(1.0f, 1.0f, 1.0f));
-    // fading for the point light
-    shader_->SetUniform("light.constant",   1.0f);
-    shader_->SetUniform("light.linear",     0.09f);
-    shader_->SetUniform("light.quadratic",  0.032f);
+    shader_->SetUniform("spot_light.ambient",    glm::vec3(0.2f));
+    shader_->SetUniform("spot_light.diffuse",    glm::vec3(0.5f, 0.5f, 0.5f));
+    shader_->SetUniform("spot_light.specular",   glm::vec3(1.0f, 1.0f, 1.0f));
+
 }
 
-void Photographer::DrawLightCube()
+void Photographer::DrawLightCubes()
 {
     light_shader_->use();
-
-    // light position changes
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, light_position_);
-    model = glm::scale(model, glm::vec3(0.2f));
-    light_shader_->SetUniform("model", model);
 
     // camera -- could change
     light_shader_->SetUniform("view", camera_->GetGlViewMatrix());
     light_shader_->SetUniform("projection", camera_->GetGlProjectionMatrix());
 
-    // draw
     glBindVertexArray(light_vertex_array_);
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    for (int i = 0; i < kPointLights; ++i)
+    {
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, point_light_positions_[i]);
+        model = glm::scale(model, glm::vec3(0.2f));
+        light_shader_->SetUniform("model", model);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 }
 
 void Photographer::DrawMainObjects()
@@ -229,8 +250,8 @@ void Photographer::DrawMainObjects()
     shader_->SetUniform("eye_pos", camera_->position());
 
     // light
-    shader_->SetUniform("light.direction", camera_->front_vector());
-    shader_->SetUniform("light.position", camera_->position());
+    shader_->SetUniform("spot_light.direction", camera_->front_vector());
+    shader_->SetUniform("spot_light.position", camera_->position());
 
     // draw cubes
     glBindVertexArray(this->object_vertex_array_);
