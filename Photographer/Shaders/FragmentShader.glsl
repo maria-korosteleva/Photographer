@@ -106,7 +106,7 @@ vec3 CalcSpecular(vec3 light_specular, vec3 light_dir, vec3 normal, vec3 view_di
 
 vec3 CalcDirectionalLight(DirectionalLight light, vec3 normal, vec3 view_dir)
 {
-    vec3 light_dir = normalize(light.direction);
+    vec3 light_dir = normalize(-light.direction);
 
     // components
     vec3 ambient = CalcAmbient(light.ambient);

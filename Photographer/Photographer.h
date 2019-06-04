@@ -40,7 +40,9 @@ private:
     // Scene preparation
     void CreateObjectVAO();
     unsigned int LoadTexture(const char * filename, bool alpha = false);
-    void InitShadersLightColor();
+    void CreateShaders();
+    void SetUpObjectColor();
+    void SetUpLight();
 
     // called every frame
     void DrawLightCubes();

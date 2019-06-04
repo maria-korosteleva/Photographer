@@ -21,11 +21,13 @@ int Photographer::run()
     GLFWwindow* window = InitWindowContext();
     RegisterCallbacks(window);
     
-    // Setup the scene
+    // The scene
     CreateObjectVAO();
-    InitShadersLightColor();
+    CreateShaders();
+    SetUpObjectColor();
+    SetUpLight();
 
-    // Setup camera
+    // Camera
     camera_ = new Camera(win_width_, win_height_);
     camera_->SetPosition(glm::vec3(0.0f, 1.0f, 5.0f));
 
@@ -163,23 +165,29 @@ unsigned int Photographer::LoadTexture(const char * filename, bool alpha)
     return texture;
 }
 
-void Photographer::InitShadersLightColor()
+void Photographer::CreateShaders()
 {
     if (shader_ != nullptr) delete shader_;
     shader_ = new Shader(vertex_shader_path_, fragment_shader_path_);
     if (light_shader_ != nullptr) delete light_shader_;
     light_shader_ = new Shader(vertex_shader_path_, light_fragment_shader_path_);
+}
 
-    // cube coloring
+void Photographer::SetUpObjectColor()
+{
     shader_->use();
+
     tex_container_ = LoadTexture(tex_container_path_);
     tex_steel_border_ = LoadTexture(tex_steel_border_path_, true);
     tex_face_ = LoadTexture(tex_smiley_path_, true);
-    shader_->SetUniform("material.diffuse",     0);   // bind the first texture as a diffuse map
-    shader_->SetUniform("material.specular",    2);   // bind the second texture as a specular map
-    shader_->SetUniform("material.shininess",   128.0f);
 
-    // Illumination properties
+    shader_->SetUniform("material.diffuse", 0);   // container
+    shader_->SetUniform("material.specular", 2);   // face
+    shader_->SetUniform("material.shininess", 128.0f);
+}
+
+void Photographer::SetUpLight()
+{
     // directional
     shader_->SetUniform("directional_light.direction", dir_light_);
     shader_->SetUniform("directional_light.ambient", glm::vec3(0.2f));
@@ -207,11 +215,11 @@ void Photographer::InitShadersLightColor()
     // positions and directions are defined on the go
     shader_->SetUniform("spot_light.cut_off", glm::cos(glm::radians(12.5f)));
     shader_->SetUniform("spot_light.outer_cut_off", glm::cos(glm::radians(18.0f)));
+    
     // color components
-    shader_->SetUniform("spot_light.ambient",    glm::vec3(0.2f));
-    shader_->SetUniform("spot_light.diffuse",    glm::vec3(0.5f, 0.5f, 0.5f));
-    shader_->SetUniform("spot_light.specular",   glm::vec3(1.0f, 1.0f, 1.0f));
-
+    shader_->SetUniform("spot_light.ambient", glm::vec3(0.2f));
+    shader_->SetUniform("spot_light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+    shader_->SetUniform("spot_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
 void Photographer::DrawLightCubes()
