@@ -70,6 +70,11 @@ int Photographer::run()
     return 0;
 }
 
+void Photographer::SetObject(GeneralMesh * object)
+{
+    object_ = object;
+}
+
 void Photographer::CreateObjectVAO()
 {
     // id avalibility check

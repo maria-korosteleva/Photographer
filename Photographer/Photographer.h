@@ -13,6 +13,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+// From other Project 
+#include <GK-Undressing-People-Ceres/GeneralMesh.h>
+
+// Local
 #include "Shader.h"
 #include "Camera.h"
 
@@ -32,6 +36,8 @@ public:
     ~Photographer();
 
     int run();
+
+    void SetObject(GeneralMesh* object);
 
 private:
     static constexpr const char* const vertex_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/VertexShader.glsl";
@@ -61,6 +67,9 @@ private:
     static void MouseCallback(GLFWwindow* window, double xpos, double ypos);
     static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
+    // target
+    GeneralMesh* object_;
+    
     // running ids
     unsigned int object_vertex_array_ = 0;
     unsigned int light_vertex_array_ = 0;

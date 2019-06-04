@@ -36,6 +36,9 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\GigaKorea\GK-Undressing-People-Ceres\GK-Undressing-People-Ceres\GeneralMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Photographer.h">
@@ -45,6 +48,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\GigaKorea\GK-Undressing-People-Ceres\GK-Undressing-People-Ceres\GeneralMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
