@@ -8,26 +8,26 @@ Shader::Shader(const GLchar * vertex_path, const GLchar * fragment_path)
     // read & compile
     if (vertex_path != nullptr)
     {
-        std::string vertex_code = Shader::ReadCodeFile(vertex_path);
-        vertex_shader = Shader::CompileVertexShader(vertex_code.c_str());
+        std::string vertex_code = Shader::readCodeFile_(vertex_path);
+        vertex_shader = Shader::compileVertexShader_(vertex_code.c_str());
     }
     else
     {
-        vertex_shader = Shader::CompileVertexShader(default_vertex_shader_source_);
+        vertex_shader = Shader::compileVertexShader_(default_vertex_shader_source_);
     }
     
     if (fragment_path != nullptr)
     {
-        std::string fragment_code = Shader::ReadCodeFile(fragment_path);
-        fragment_shader = Shader::CompileFragmentShader(fragment_code.c_str());
+        std::string fragment_code = Shader::readCodeFile_(fragment_path);
+        fragment_shader = Shader::compileFragmentShader_(fragment_code.c_str());
     }
     else
     {
-        fragment_shader = Shader::CompileFragmentShader(default_fragment_shader_source_);
+        fragment_shader = Shader::compileFragmentShader_(default_fragment_shader_source_);
     }
     
     // create program
-    CreateProgram(vertex_shader, fragment_shader);
+    createProgram_(vertex_shader, fragment_shader);
 
     // cleanup
     glDeleteShader(vertex_shader);
@@ -44,40 +44,40 @@ void Shader::use()
     glUseProgram(ID_);
 }
 
-void Shader::SetUniform(const std::string & name, bool value) const
+void Shader::setUniform(const std::string & name, bool value) const
 {
     glUniform1i(glGetUniformLocation(ID_, name.c_str()), (int)value);
 }
 
-void Shader::SetUniform(const std::string & name, int value) const
+void Shader::setUniform(const std::string & name, int value) const
 {
     glUniform1i(glGetUniformLocation(ID_, name.c_str()), value);
 }
 
-void Shader::SetUniform(const std::string & name, float value) const
+void Shader::setUniform(const std::string & name, float value) const
 {
     glUniform1f(glGetUniformLocation(ID_, name.c_str()), value);
 }
 
-void Shader::SetUniform(const std::string & name, glm::mat4 value) const
+void Shader::setUniform(const std::string & name, glm::mat4 value) const
 {
     unsigned int location = glGetUniformLocation(ID_, name.c_str());
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
-void Shader::SetUniform(const std::string & name, glm::vec3 value) const
+void Shader::setUniform(const std::string & name, glm::vec3 value) const
 {
     unsigned int location = glGetUniformLocation(ID_, name.c_str());
     glUniform3fv(location, 1, glm::value_ptr(value));
 }
 
-void Shader::SetUniform(const std::string & name, glm::vec4 value) const
+void Shader::setUniform(const std::string & name, glm::vec4 value) const
 {
     unsigned int location = glGetUniformLocation(ID_, name.c_str());
     glUniform4fv(location, 1, glm::value_ptr(value));
 }
 
-void Shader::CreateProgram(unsigned int vertex_shader, unsigned int fragment_shader)
+void Shader::createProgram_(unsigned int vertex_shader, unsigned int fragment_shader)
 {
     // link shaders
     ID_ = glCreateProgram();
@@ -95,7 +95,7 @@ void Shader::CreateProgram(unsigned int vertex_shader, unsigned int fragment_sha
     }
 }
 
-std::string Shader::ReadCodeFile(const GLchar * path)
+std::string Shader::readCodeFile_(const GLchar * path)
 {
     std::string code;
     std::ifstream file;
@@ -117,7 +117,7 @@ std::string Shader::ReadCodeFile(const GLchar * path)
     return code;
 }
 
-unsigned int Shader::CompileVertexShader(const char * shader_code)
+unsigned int Shader::compileVertexShader_(const char * shader_code)
 {
     unsigned int vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
 
@@ -139,7 +139,7 @@ unsigned int Shader::CompileVertexShader(const char * shader_code)
     return vertex_shader_id;
 }
 
-unsigned int Shader::CompileFragmentShader(const char * shader_code)
+unsigned int Shader::compileFragmentShader_(const char * shader_code)
 {
     unsigned int fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
 

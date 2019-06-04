@@ -37,35 +37,35 @@ public:
 
     int run();
 
-    void SetObject(GeneralMesh* object);
+    void setObject(GeneralMesh* object);
 
 private:
     static constexpr const char* const vertex_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/VertexShader.glsl";
     static constexpr const char const * fragment_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/FragmentShader.glsl";
     static constexpr const char const * light_fragment_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/LightFragmentShader.glsl";
     // Scene preparation
-    void CreateObjectVAO();
-    unsigned int LoadTexture(const char * filename, bool alpha = false);
-    void CreateShaders();
-    void SetUpObjectColor();
-    void SetUpLight();
+    void createObjectVAO_();
+    unsigned int loadTexture_(const char * filename, bool alpha = false);
+    void createShaders_();
+    void setUpObjectColor_();
+    void setUpLight_();
 
     // called every frame
-    void DrawLightCubes();
-    void DrawMainObjects();
+    void drawLightCubes_();
+    void drawMainObjects_();
 
     // context set-up
-    GLFWwindow* InitWindowContext();
-    void RegisterCallbacks(GLFWwindow* window);
-    void CleanAndCloseContext();
+    GLFWwindow* initWindowContext_();
+    void registerCallbacks_(GLFWwindow* window);
+    void cleanAndCloseContext_();
     
     // TUTORIAL
     // View Control
-    void ProcessInput(GLFWwindow *window);
+    void processInput_(GLFWwindow *window);
     // callbacks should be static!
-    static void FramebufferSizeCallback(GLFWwindow* window, int width, int height);
-    static void MouseCallback(GLFWwindow* window, double xpos, double ypos);
-    static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+    static void framebufferSizeCallback_(GLFWwindow* window, int width, int height);
+    static void mouseCallback(GLFWwindow* window, double xpos, double ypos);
+    static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
     // target
     GeneralMesh* object_;

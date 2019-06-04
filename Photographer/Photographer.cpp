@@ -18,18 +18,18 @@ Photographer::~Photographer()
 
 int Photographer::run()
 {
-    GLFWwindow* window = InitWindowContext();
-    RegisterCallbacks(window);
+    GLFWwindow* window = initWindowContext_();
+    registerCallbacks_(window);
     
     // The scene
-    CreateObjectVAO();
-    CreateShaders();
-    SetUpObjectColor();
-    SetUpLight();
+    createObjectVAO_();
+    createShaders_();
+    setUpObjectColor_();
+    setUpLight_();
 
     // Camera
     camera_ = new Camera(win_width_, win_height_);
-    camera_->SetPosition(glm::vec3(0.0f, 1.0f, 5.0f));
+    camera_->setPosition(glm::vec3(0.0f, 1.0f, 5.0f));
 
     // operating the view
     Photographer::lastX_ = 400;
@@ -40,7 +40,7 @@ int Photographer::run()
     while (!glfwWindowShouldClose(window))
     {
         // TUTORIAL input
-        this->ProcessInput(window);
+        this->processInput_(window);
 
         // Backgournd render commands
         glClearColor(0.6f, 0.6f, 0.6f, 1.0f);   // state-setting function
@@ -52,8 +52,8 @@ int Photographer::run()
         //dir_light_.z = radius * cos(glfwGetTime());
 
         // Draw
-        DrawLightCubes();
-        DrawMainObjects();
+        drawLightCubes_();
+        drawMainObjects_();
 
         // ----- finish
         // swap the buffers and check all call events
@@ -66,16 +66,16 @@ int Photographer::run()
         last_frame_time_ = currentFrame;
     }
 
-    CleanAndCloseContext();
+    cleanAndCloseContext_();
     return 0;
 }
 
-void Photographer::SetObject(GeneralMesh * object)
+void Photographer::setObject(GeneralMesh * object)
 {
     object_ = object;
 }
 
-void Photographer::CreateObjectVAO()
+void Photographer::createObjectVAO_()
 {
     // id avalibility check
     if (object_vertex_array_ > 0
@@ -130,7 +130,7 @@ void Photographer::CreateObjectVAO()
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-unsigned int Photographer::LoadTexture(const char * filename, bool alpha)
+unsigned int Photographer::loadTexture_(const char * filename, bool alpha)
 {
     unsigned int texture;
     glGenTextures(1, &texture);
@@ -170,7 +170,7 @@ unsigned int Photographer::LoadTexture(const char * filename, bool alpha)
     return texture;
 }
 
-void Photographer::CreateShaders()
+void Photographer::createShaders_()
 {
     if (shader_ != nullptr) delete shader_;
     shader_ = new Shader(vertex_shader_path_, fragment_shader_path_);
@@ -178,26 +178,26 @@ void Photographer::CreateShaders()
     light_shader_ = new Shader(vertex_shader_path_, light_fragment_shader_path_);
 }
 
-void Photographer::SetUpObjectColor()
+void Photographer::setUpObjectColor_()
 {
     shader_->use();
 
-    tex_container_ = LoadTexture(tex_container_path_);
-    tex_steel_border_ = LoadTexture(tex_steel_border_path_, true);
-    tex_face_ = LoadTexture(tex_smiley_path_, true);
+    tex_container_ = loadTexture_(tex_container_path_);
+    tex_steel_border_ = loadTexture_(tex_steel_border_path_, true);
+    tex_face_ = loadTexture_(tex_smiley_path_, true);
 
-    shader_->SetUniform("material.diffuse", 0);   // container
-    shader_->SetUniform("material.specular", 2);   // face
-    shader_->SetUniform("material.shininess", 128.0f);
+    shader_->setUniform("material.diffuse", 0);   // container
+    shader_->setUniform("material.specular", 2);   // face
+    shader_->setUniform("material.shininess", 128.0f);
 }
 
-void Photographer::SetUpLight()
+void Photographer::setUpLight_()
 {
     // directional
-    shader_->SetUniform("directional_light.direction", dir_light_);
-    shader_->SetUniform("directional_light.ambient", glm::vec3(0.2f));
-    shader_->SetUniform("directional_light.diffuse", glm::vec3(0.0f, 0.0f, 0.7f));
-    shader_->SetUniform("directional_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    shader_->setUniform("directional_light.direction", dir_light_);
+    shader_->setUniform("directional_light.ambient", glm::vec3(0.2f));
+    shader_->setUniform("directional_light.diffuse", glm::vec3(0.0f, 0.0f, 0.7f));
+    shader_->setUniform("directional_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
     // point lights
     for (int i = 0; i < kPointLights; ++i)
@@ -205,35 +205,35 @@ void Photographer::SetUpLight()
         std::string name = "point_lights[";
         name += std::to_string(i) + ']';
 
-        shader_->SetUniform(name + ".position", point_light_positions_[i]);
+        shader_->setUniform(name + ".position", point_light_positions_[i]);
 
-        shader_->SetUniform(name + ".ambient", glm::vec3(0.2f));
-        shader_->SetUniform(name + ".diffuse", glm::vec3(0.5f, 0.0f, 0.0f));
-        shader_->SetUniform(name + ".specular", glm::vec3(1.0f, 1.0f, 1.0f));
+        shader_->setUniform(name + ".ambient", glm::vec3(0.2f));
+        shader_->setUniform(name + ".diffuse", glm::vec3(0.5f, 0.0f, 0.0f));
+        shader_->setUniform(name + ".specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
-        shader_->SetUniform(name + ".attenuation_constant", 1.0f);
-        shader_->SetUniform(name + ".attenuation_linear", 0.09f);
-        shader_->SetUniform(name + ".attenuation_quadratic", 0.032f);
+        shader_->setUniform(name + ".attenuation_constant", 1.0f);
+        shader_->setUniform(name + ".attenuation_linear", 0.09f);
+        shader_->setUniform(name + ".attenuation_quadratic", 0.032f);
     }
 
     // spotlight properties
     // positions and directions are defined on the go
-    shader_->SetUniform("spot_light.cut_off", glm::cos(glm::radians(12.5f)));
-    shader_->SetUniform("spot_light.outer_cut_off", glm::cos(glm::radians(18.0f)));
+    shader_->setUniform("spot_light.cut_off", glm::cos(glm::radians(12.5f)));
+    shader_->setUniform("spot_light.outer_cut_off", glm::cos(glm::radians(18.0f)));
     
     // color components
-    shader_->SetUniform("spot_light.ambient", glm::vec3(0.2f));
-    shader_->SetUniform("spot_light.diffuse", glm::vec3(0.0f, 0.5f, 0.5f));
-    shader_->SetUniform("spot_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    shader_->setUniform("spot_light.ambient", glm::vec3(0.2f));
+    shader_->setUniform("spot_light.diffuse", glm::vec3(0.0f, 0.5f, 0.5f));
+    shader_->setUniform("spot_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
-void Photographer::DrawLightCubes()
+void Photographer::drawLightCubes_()
 {
     light_shader_->use();
 
     // camera -- could change
-    light_shader_->SetUniform("view", camera_->GetGlViewMatrix());
-    light_shader_->SetUniform("projection", camera_->GetGlProjectionMatrix());
+    light_shader_->setUniform("view", camera_->getGlViewMatrix());
+    light_shader_->setUniform("projection", camera_->getGlProjectionMatrix());
 
     glBindVertexArray(light_vertex_array_);
     for (int i = 0; i < kPointLights; ++i)
@@ -241,13 +241,13 @@ void Photographer::DrawLightCubes()
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, point_light_positions_[i]);
         model = glm::scale(model, glm::vec3(0.2f));
-        light_shader_->SetUniform("model", model);
+        light_shader_->setUniform("model", model);
 
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 }
 
-void Photographer::DrawMainObjects()
+void Photographer::drawMainObjects_()
 {
     shader_->use();
 
@@ -258,13 +258,13 @@ void Photographer::DrawMainObjects()
     glBindTexture(GL_TEXTURE_2D, tex_face_);
 
     // camera
-    shader_->SetUniform("view", camera_->GetGlViewMatrix());
-    shader_->SetUniform("projection", camera_->GetGlProjectionMatrix());
-    shader_->SetUniform("eye_pos", camera_->position());
+    shader_->setUniform("view", camera_->getGlViewMatrix());
+    shader_->setUniform("projection", camera_->getGlProjectionMatrix());
+    shader_->setUniform("eye_pos", camera_->getPosition());
 
     // light
-    shader_->SetUniform("spot_light.direction", camera_->front_vector());
-    shader_->SetUniform("spot_light.position", camera_->position());
+    shader_->setUniform("spot_light.direction", camera_->getFrontVector());
+    shader_->setUniform("spot_light.position", camera_->getPosition());
 
     // draw cubes
     glBindVertexArray(this->object_vertex_array_);
@@ -282,15 +282,15 @@ void Photographer::DrawMainObjects()
             float angle = 20.0f * i;
             model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
         }
-        shader_->SetUniform("model", model);
-        shader_->SetUniform("normal_matrix", glm::transpose(glm::inverse(model)));
+        shader_->setUniform("model", model);
+        shader_->setUniform("normal_matrix", glm::transpose(glm::inverse(model)));
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
     //glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
 
 }
 
-GLFWwindow* Photographer::InitWindowContext()
+GLFWwindow* Photographer::initWindowContext_()
 {
     glfwInit();
 
@@ -331,14 +331,14 @@ GLFWwindow* Photographer::InitWindowContext()
     return window;
 }
 
-void Photographer::RegisterCallbacks(GLFWwindow * window)
+void Photographer::registerCallbacks_(GLFWwindow * window)
 {
-    glfwSetFramebufferSizeCallback(window, Photographer::FramebufferSizeCallback);
-    glfwSetCursorPosCallback(window, Photographer::MouseCallback);
-    glfwSetScrollCallback(window, Photographer::ScrollCallback);
+    glfwSetFramebufferSizeCallback(window, Photographer::framebufferSizeCallback_);
+    glfwSetCursorPosCallback(window, Photographer::mouseCallback);
+    glfwSetScrollCallback(window, Photographer::scrollCallback);
 }
 
-void Photographer::CleanAndCloseContext()
+void Photographer::cleanAndCloseContext_()
 {
     glDeleteVertexArrays(1, &object_vertex_array_);
     glDeleteBuffers(1, &object_vertex_buffer_);
@@ -354,7 +354,7 @@ void Photographer::CleanAndCloseContext()
     object_vertex_array_ = object_element_buffer_ = object_vertex_buffer_ = tex_container_ = tex_face_ = 0;
 }
 
-void Photographer::ProcessInput(GLFWwindow * window)
+void Photographer::processInput_(GLFWwindow * window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     {
@@ -363,21 +363,21 @@ void Photographer::ProcessInput(GLFWwindow * window)
 
     // camera control
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera_->MovePosition(camera_->FORWARD, delta_time_);
+        camera_->movePosition(camera_->FORWARD, delta_time_);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera_->MovePosition(camera_->BACKWARD, delta_time_);
+        camera_->movePosition(camera_->BACKWARD, delta_time_);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera_->MovePosition(camera_->LEFT, delta_time_);
+        camera_->movePosition(camera_->LEFT, delta_time_);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera_->MovePosition(camera_->RIGHT, delta_time_);
+        camera_->movePosition(camera_->RIGHT, delta_time_);
 }
 
-void Photographer::FramebufferSizeCallback(GLFWwindow * window, int width, int height)
+void Photographer::framebufferSizeCallback_(GLFWwindow * window, int width, int height)
 {
     glViewport(0, 0, width, height);
 }
 
-void Photographer::MouseCallback(GLFWwindow * window, double xpos, double ypos)
+void Photographer::mouseCallback(GLFWwindow * window, double xpos, double ypos)
 {
     if (first_mouse_)
     {
@@ -391,10 +391,10 @@ void Photographer::MouseCallback(GLFWwindow * window, double xpos, double ypos)
     lastX_ = xpos;
     lastY_ = ypos;
 
-    camera_->UpdateRotation(yoffset, xoffset);
+    camera_->updateRotation(yoffset, xoffset);
 }
 
-void Photographer::ScrollCallback(GLFWwindow * window, double xoffset, double yoffset)
+void Photographer::scrollCallback(GLFWwindow * window, double xoffset, double yoffset)
 {
-    camera_->Zoom(yoffset);
+    camera_->zoom(yoffset);
 }

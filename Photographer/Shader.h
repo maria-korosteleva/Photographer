@@ -21,23 +21,23 @@ class Shader
     // Activate the shader
     void use();
     // working with uniforms
-    void SetUniform(const std::string &name, bool value) const;
-    void SetUniform(const std::string &name, int value) const;
-    void SetUniform(const std::string &name, float value) const;
-    void SetUniform(const std::string &name, glm::mat4 value) const;
-    void SetUniform(const std::string &name, glm::vec3 value) const;
-    void SetUniform(const std::string &name, glm::vec4 value) const;
+    void setUniform(const std::string &name, bool value) const;
+    void setUniform(const std::string &name, int value) const;
+    void setUniform(const std::string &name, float value) const;
+    void setUniform(const std::string &name, glm::mat4 value) const;
+    void setUniform(const std::string &name, glm::vec3 value) const;
+    void setUniform(const std::string &name, glm::vec4 value) const;
     // Program ID
-    unsigned int ID() { return this->ID_; }
+    unsigned int getID() { return this->ID_; }
   
   private:
-    void CreateProgram(unsigned int vertex_shader, unsigned int fragment_shader);
+    void createProgram_(unsigned int vertex_shader, unsigned int fragment_shader);
 
-    static std::string ReadCodeFile(const GLchar* path);
+    static std::string readCodeFile_(const GLchar* path);
 
     // compilers
-    static unsigned int CompileVertexShader(const char* shader_code);
-    static unsigned int CompileFragmentShader(const char* shader_code);
+    static unsigned int compileVertexShader_(const char* shader_code);
+    static unsigned int compileFragmentShader_(const char* shader_code);
     
     unsigned int ID_;
 

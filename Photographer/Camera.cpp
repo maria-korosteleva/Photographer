@@ -8,36 +8,36 @@ Camera::Camera(int screen_width, int screen_height, float field_of_view)
     yaw_ = -90.0f;
     pitch_ = 0.0f;
 
-    UpdateCameraRotation();
+    updateCameraRotation_();
 }
 
 Camera::~Camera()
 {
 }
 
-glm::mat4 Camera::GetGlViewMatrix()
+glm::mat4 Camera::getGlViewMatrix()
 {
     return glm::lookAt(position_, position_ + front_, up_);
 }
 
-glm::mat4 Camera::GetGlProjectionMatrix()
+glm::mat4 Camera::getGlProjectionMatrix()
 {
     return glm::perspective(field_of_view_, screen_width_ / screen_height_, 0.1f, 100.0f);
 }
 
-void Camera::SetPosition(glm::vec3 pos)
+void Camera::setPosition(glm::vec3 pos)
 {
     position_ = pos;
 }
 
-void Camera::SetRotation(float pitch, float yaw)
+void Camera::setRotation(float pitch, float yaw)
 {
     pitch_ = pitch;
     yaw_ = yaw;
-    UpdateCameraRotation();
+    updateCameraRotation_();
 }
 
-void Camera::MovePosition(Directions direction, float step_size_multiplier)
+void Camera::movePosition(Directions direction, float step_size_multiplier)
 {
     float velocity = movement_speed_ * step_size_multiplier;
 
@@ -58,7 +58,7 @@ void Camera::MovePosition(Directions direction, float step_size_multiplier)
     }
 }
 
-void Camera::UpdateRotation(float delta_pitch, float delta_yaw, bool constrain_pitch)
+void Camera::updateRotation(float delta_pitch, float delta_yaw, bool constrain_pitch)
 {
     delta_pitch *= rotation_sensitivity_;
     delta_yaw *= rotation_sensitivity_;
@@ -72,10 +72,10 @@ void Camera::UpdateRotation(float delta_pitch, float delta_yaw, bool constrain_p
         if (pitch_ < -89.0f) pitch_ = -89.0f;
     }
 
-    UpdateCameraRotation();
+    updateCameraRotation_();
 }
 
-void Camera::Zoom(float delta)
+void Camera::zoom(float delta)
 {
     if (field_of_view_ >= 1.0f && field_of_view_ <= default_fov_)
         field_of_view_ -= zoom_sensitivity_ * delta;
@@ -85,7 +85,7 @@ void Camera::Zoom(float delta)
     if (field_of_view_ >= default_fov_)      field_of_view_ = default_fov_;
 }
 
-void Camera::UpdateCameraRotation()
+void Camera::updateCameraRotation_()
 {
     // New Front vector
     glm::vec3 front;
