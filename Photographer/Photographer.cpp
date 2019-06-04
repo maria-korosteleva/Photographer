@@ -43,7 +43,7 @@ int Photographer::run()
         this->ProcessInput(window);
 
         // Backgournd render commands
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);   // state-setting function
+        glClearColor(0.6f, 0.6f, 0.6f, 1.0f);   // state-setting function
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);       // state-using function
 
         // move light 
@@ -191,7 +191,7 @@ void Photographer::SetUpLight()
     // directional
     shader_->SetUniform("directional_light.direction", dir_light_);
     shader_->SetUniform("directional_light.ambient", glm::vec3(0.2f));
-    shader_->SetUniform("directional_light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+    shader_->SetUniform("directional_light.diffuse", glm::vec3(0.0f, 0.0f, 0.7f));
     shader_->SetUniform("directional_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
     // point lights
@@ -203,7 +203,7 @@ void Photographer::SetUpLight()
         shader_->SetUniform(name + ".position", point_light_positions_[i]);
 
         shader_->SetUniform(name + ".ambient", glm::vec3(0.2f));
-        shader_->SetUniform(name + ".diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+        shader_->SetUniform(name + ".diffuse", glm::vec3(0.5f, 0.0f, 0.0f));
         shader_->SetUniform(name + ".specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
         shader_->SetUniform(name + ".attenuation_constant", 1.0f);
@@ -218,7 +218,7 @@ void Photographer::SetUpLight()
     
     // color components
     shader_->SetUniform("spot_light.ambient", glm::vec3(0.2f));
-    shader_->SetUniform("spot_light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+    shader_->SetUniform("spot_light.diffuse", glm::vec3(0.0f, 0.5f, 0.5f));
     shader_->SetUniform("spot_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
