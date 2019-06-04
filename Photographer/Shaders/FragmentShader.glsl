@@ -6,11 +6,16 @@ struct Material {
 };
 
 struct Light {
-    vec4 direction; // direction from the light source (point or directional)
+    vec4 direction; // direction to the light source (point or directional)
 
     vec3 ambient;   // control the intensity
     vec3 diffuse;   // main light color
     vec3 specular;  // usually just white
+
+    // attenuation parameters
+    float constant;
+    float linear;
+    float quadratic;
 };
 
 // output color!
@@ -31,18 +36,24 @@ void main()
     // ambient
     vec3 ambient = light.ambient * vec3(texture(material.diffuse, TexCoord));
 
-    // diffuse
+    // light directions
     vec3 norm = normalize(Normal);
     vec3 lightDir;
+    float attenuation;
     if (light.direction.w > 0.0)
     { // point light
         lightDir = normalize(vec3(light.direction) - FragPosition);
+        float dist  =   length(vec3(light.direction) - FragPosition);
+        attenuation =   1.0 / (light.constant + light.linear * dist + 
+                        light.quadratic * dist * dist);
     }     
     else 
     { // directional light
-        lightDir = normalize(-vec3(light.direction));
+        lightDir = normalize(vec3(light.direction));
+        attenuation = 1.0;
     }
 
+    // diffuse
     float diffStrength = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = diffStrength * light.diffuse * vec3(texture(material.diffuse, TexCoord));
 
@@ -54,5 +65,5 @@ void main()
     vec3 specular = specularStrength * light.specular * vec3(texture(material.specular, TexCoord));
 
     // all components together
-    FragColor = vec4(diffuse + ambient + specular, 1.0);
+    FragColor = vec4(attenuation * (diffuse + ambient + specular), 1.0);
 }

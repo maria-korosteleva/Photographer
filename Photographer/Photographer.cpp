@@ -175,15 +175,18 @@ void Photographer::InitShadersLightColor()
     tex_container_ = LoadTexture(tex_container_path_);
     tex_steel_border_ = LoadTexture(tex_steel_border_path_, true);
     tex_face_ = LoadTexture(tex_smiley_path_, true);
-    shader_->SetUniform("material.diffuse", 0);   // bind the first texture as a diffuse map
-    shader_->SetUniform("material.specular", 2);   // bind the second texture as a specular map
-    shader_->SetUniform("material.shininess", 128.0f);
+    shader_->SetUniform("material.diffuse",     0);   // bind the first texture as a diffuse map
+    shader_->SetUniform("material.specular",    2);   // bind the second texture as a specular map
+    shader_->SetUniform("material.shininess",   128.0f);
 
     // Illumination properties
-    shader_->SetUniform("light.direction", glm::vec4(-light_position_, 0.0f));
-    shader_->SetUniform("light.ambient", glm::vec3(0.2f));
-    shader_->SetUniform("light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
-    shader_->SetUniform("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    shader_->SetUniform("light.direction",  glm::vec4(light_position_, 1.0f));
+    shader_->SetUniform("light.ambient",    glm::vec3(0.2f));
+    shader_->SetUniform("light.diffuse",    glm::vec3(0.5f, 0.5f, 0.5f));
+    shader_->SetUniform("light.specular",   glm::vec3(1.0f, 1.0f, 1.0f));
+    shader_->SetUniform("light.constant",   1.0f);
+    shader_->SetUniform("light.linear",     0.09f);
+    shader_->SetUniform("light.quadratic",  0.032f);
 }
 
 void Photographer::DrawLightCube()
@@ -221,7 +224,7 @@ void Photographer::DrawMainObjects()
     shader_->SetUniform("eyePos", camera_->position());
 
     // light
-    shader_->SetUniform("light.direction", glm::vec4(-light_position_, 0.0f));
+    shader_->SetUniform("light.direction", glm::vec4(light_position_, 1.0f));
 
     // draw cubes
     glBindVertexArray(this->object_vertex_array_);
