@@ -1,25 +1,25 @@
 #version 330 core
-layout(location = 0) in vec3 aPos;
-layout(location = 1) in vec3 aNormal;
-layout(location = 2) in vec2 aTexCoord;
+layout(location = 0) in vec3 a_pos;
+layout(location = 1) in vec3 a_normal;
+layout(location = 2) in vec2 a_tex_coord;
 
-out vec2 TexCoord;
-out vec3 Normal;
-out vec3 FragPosition;  // in world coordinates
+out vec2 tex_coord;
+out vec3 normal;
+out vec3 frag_position;  // in world coordinates
 
 uniform mat4 model;
-uniform mat4 normalMatrix;
+uniform mat4 normal_matrix;
 uniform mat4 view;
 uniform mat4 projection;
 
 void main()
 {
     // info for fragment shader
-    FragPosition = vec3(model * vec4(aPos, 1.0));
-    TexCoord = aTexCoord;
+    frag_position = vec3(model * vec4(a_pos, 1.0));
+    tex_coord = a_tex_coord;
     // avoid scaling issues. Equivalent to vector transformation
-    Normal = mat3(normalMatrix) * aNormal;
+    normal = mat3(normal_matrix) * a_normal;
 
     // final coordinates
-    gl_Position = projection * view * vec4(FragPosition, 1.0);
+    gl_Position = projection * view * vec4(frag_position, 1.0);
 }

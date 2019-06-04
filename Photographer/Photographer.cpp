@@ -180,10 +180,15 @@ void Photographer::InitShadersLightColor()
     shader_->SetUniform("material.shininess",   128.0f);
 
     // Illumination properties
-    shader_->SetUniform("light.direction",  glm::vec4(light_position_, 1.0f));
+    // spotlight properties
+    //shader_->SetUniform("light.direction",  glm::vec3(light_position_));
+    shader_->SetUniform("light.cut_off", glm::cos(glm::radians(12.5f)));
+    shader_->SetUniform("light.outer_cut_off", glm::cos(glm::radians(18.0f)));
+    // color components
     shader_->SetUniform("light.ambient",    glm::vec3(0.2f));
     shader_->SetUniform("light.diffuse",    glm::vec3(0.5f, 0.5f, 0.5f));
     shader_->SetUniform("light.specular",   glm::vec3(1.0f, 1.0f, 1.0f));
+    // fading for the point light
     shader_->SetUniform("light.constant",   1.0f);
     shader_->SetUniform("light.linear",     0.09f);
     shader_->SetUniform("light.quadratic",  0.032f);
@@ -221,10 +226,11 @@ void Photographer::DrawMainObjects()
     // camera
     shader_->SetUniform("view", camera_->GetGlViewMatrix());
     shader_->SetUniform("projection", camera_->GetGlProjectionMatrix());
-    shader_->SetUniform("eyePos", camera_->position());
+    shader_->SetUniform("eye_pos", camera_->position());
 
     // light
-    shader_->SetUniform("light.direction", glm::vec4(light_position_, 1.0f));
+    shader_->SetUniform("light.direction", camera_->front_vector());
+    shader_->SetUniform("light.position", camera_->position());
 
     // draw cubes
     glBindVertexArray(this->object_vertex_array_);
@@ -243,7 +249,7 @@ void Photographer::DrawMainObjects()
             model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
         }
         shader_->SetUniform("model", model);
-        shader_->SetUniform("normalMatrix", glm::transpose(glm::inverse(model)));
+        shader_->SetUniform("normal_matrix", glm::transpose(glm::inverse(model)));
         glDrawArrays(GL_TRIANGLES, 0, 36);
     }
     //glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
