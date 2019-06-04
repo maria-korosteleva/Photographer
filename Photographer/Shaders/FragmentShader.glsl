@@ -1,8 +1,8 @@
 #version 330 core
 struct Material {
     float shininess;
-    sampler2D specular;
-    sampler2D diffuse;
+    vec3 specular;
+    vec3 diffuse;
 };
 
 struct DirectionalLight
@@ -87,13 +87,13 @@ void main()
 // -------------- implemetations ---------------
 vec3 CalcAmbient(vec3 light_ambient)
 {
-    return light_ambient * vec3(texture(material.diffuse, vs_tex_coord));
+    return light_ambient * material.diffuse;
 }
 
 vec3 CalcDiffuse(vec3 light_diffuse, vec3 light_dir, vec3 normal)
 {
     float diff_strength = max(dot(normal, light_dir), 0.0);
-    return diff_strength * light_diffuse * vec3(texture(material.diffuse, vs_tex_coord));
+    return diff_strength * light_diffuse * material.diffuse;
 }
 
 vec3 CalcSpecular(vec3 light_specular, vec3 light_dir, vec3 normal, vec3 view_dir)
@@ -101,7 +101,7 @@ vec3 CalcSpecular(vec3 light_specular, vec3 light_dir, vec3 normal, vec3 view_di
     // TODO efficient calculation through approximation
     vec3 reflect_dir = reflect(-light_dir, normal);
     float specular_strength = pow(max(dot(view_dir, reflect_dir), 0.0), material.shininess);
-    return specular_strength * light_specular * vec3(texture(material.specular, vs_tex_coord));
+    return specular_strength * light_specular * material.specular;
 }
 
 vec3 CalcDirectionalLight(DirectionalLight light, vec3 normal, vec3 view_dir)

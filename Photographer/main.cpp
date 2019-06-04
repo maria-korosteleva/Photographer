@@ -14,8 +14,10 @@ int main()
 
     std::cout << "Mesh Loaded!" << std::endl;
 
-    Photographer photographer;
+    //std::cout << object.getGLNormalizedVertices().size() << std::endl;
 
+    Photographer photographer;
+    photographer.setObject(&object);
     return photographer.run();
 }
 

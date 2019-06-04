@@ -52,7 +52,7 @@ int Photographer::run()
         //dir_light_.z = radius * cos(glfwGetTime());
 
         // Draw
-        drawLightCubes_();
+        //drawLightCubes_();
         drawMainObjects_();
 
         // ----- finish
@@ -96,23 +96,30 @@ void Photographer::createObjectVAO_()
     glGenBuffers(1, &object_vertex_buffer_);
     glBindBuffer(GL_ARRAY_BUFFER, object_vertex_buffer_);
     // last parameter indicated that data won't change througout the process
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cube_verts_), cube_verts_, GL_STATIC_DRAW);
+    const std::vector<GeneralMesh::GLMVertex>* verts = &object_->getGLNormalizedVertices();
+
+    glBufferData(GL_ARRAY_BUFFER, 
+        object_->getGLNormalizedVertices().size() * sizeof(GeneralMesh::GLMVertex),
+        &object_->getGLNormalizedVertices()[0], GL_STATIC_DRAW);
 
     // setup element buffer object -- for faces!
-    //glGenBuffers(1, &object_element_buffer_);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object_element_buffer_);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(this->rectangle_faces_), rectangle_faces_, GL_STATIC_DRAW);
+    glGenBuffers(1, &object_element_buffer_);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object_element_buffer_);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
+        object_->getGLMFaces().size() * sizeof(unsigned int), 
+        &object_->getGLMFaces()[0], GL_STATIC_DRAW);
 
     // Vertex data interpretation guide
     // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GeneralMesh::GLMVertex), (void*)0);
     glEnableVertexAttribArray(0);
     // normals
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GeneralMesh::GLMVertex), 
+        (void*)offsetof(GeneralMesh::GLMVertex, GeneralMesh::GLMVertex::normal));
     glEnableVertexAttribArray(1);
     // texture coordinates
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    //glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    //glEnableVertexAttribArray(2);
 
     // ------ Light object
     glGenVertexArrays(1, &light_vertex_array_);
@@ -120,7 +127,7 @@ void Photographer::createObjectVAO_()
 
     glBindBuffer(GL_ARRAY_BUFFER, object_vertex_buffer_);
     // interptrtation guide -- vertices only
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GeneralMesh::GLMVertex), (void*)0);
     glEnableVertexAttribArray(0);
 
     // Cleaning. Unbinding is not necessary, but I'm doing this for completeness
@@ -186,8 +193,8 @@ void Photographer::setUpObjectColor_()
     tex_steel_border_ = loadTexture_(tex_steel_border_path_, true);
     tex_face_ = loadTexture_(tex_smiley_path_, true);
 
-    shader_->setUniform("material.diffuse", 0);   // container
-    shader_->setUniform("material.specular", 2);   // face
+    shader_->setUniform("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+    shader_->setUniform("material.specular", glm::vec3(0.5f, 0.5f, 0.5f)); 
     shader_->setUniform("material.shininess", 128.0f);
 }
 
@@ -268,8 +275,12 @@ void Photographer::drawMainObjects_()
 
     // draw cubes
     glBindVertexArray(this->object_vertex_array_);
+    glm::mat4 model = glm::mat4(1.0f);
+    shader_->setUniform("model", model);
+    shader_->setUniform("normal_matrix", glm::transpose(glm::inverse(model)));
+    glDrawElements(GL_TRIANGLES, object_->getFaces().size(), GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
 
-    for (int i = 0; i < num_cubes_; ++i)
+    /*for (int i = 0; i < num_cubes_; ++i)
     {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, cube_positions_[i]);
@@ -284,10 +295,8 @@ void Photographer::drawMainObjects_()
         }
         shader_->setUniform("model", model);
         shader_->setUniform("normal_matrix", glm::transpose(glm::inverse(model)));
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-    }
-    //glDrawElements(GL_TRIANGLES, this->kRectangleFacesArrSize, GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
-
+        
+    }*/
 }
 
 GLFWwindow* Photographer::initWindowContext_()
