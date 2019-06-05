@@ -53,7 +53,6 @@ uniform vec3 eye_pos;
 uniform DirectionalLight directional_light;
 #define NR_POINT_LIGHTS 4
 uniform PointLight point_lights[NR_POINT_LIGHTS];
-uniform SpotLight spot_light;
 
 // calculators
 vec3 CalcAmbient    (vec3 light_ambient);
@@ -77,8 +76,6 @@ void main()
     {
         out_color += CalcPointLight(point_lights[i], norm, view_dir);
     }
-
-    out_color += CalcSpotLight(spot_light, norm, view_dir);
 
     frag_color = vec4(out_color, 1.0);
 }

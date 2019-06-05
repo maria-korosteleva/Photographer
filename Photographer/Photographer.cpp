@@ -30,7 +30,7 @@ int Photographer::run()
 
     // Camera
     camera_ = new Camera(win_width_, win_height_);
-    camera_->setPosition(glm::vec3(0.0f, 1.0f, 5.0f));
+    camera_->setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
 
     // operating the view
     Photographer::lastX_ = 400;
@@ -139,7 +139,7 @@ void Photographer::setUpLight_()
     // directional
     shader_->setUniform("directional_light.direction", dir_light_);
     shader_->setUniform("directional_light.ambient", glm::vec3(0.2f));
-    shader_->setUniform("directional_light.diffuse", glm::vec3(0.0f, 0.0f, 0.7f));
+    shader_->setUniform("directional_light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
     shader_->setUniform("directional_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
     // point lights
@@ -151,23 +151,13 @@ void Photographer::setUpLight_()
         shader_->setUniform(name + ".position", point_light_positions_[i]);
 
         shader_->setUniform(name + ".ambient", glm::vec3(0.2f));
-        shader_->setUniform(name + ".diffuse", glm::vec3(0.5f, 0.0f, 0.0f));
+        shader_->setUniform(name + ".diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
         shader_->setUniform(name + ".specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
         shader_->setUniform(name + ".attenuation_constant", 1.0f);
         shader_->setUniform(name + ".attenuation_linear", 0.09f);
         shader_->setUniform(name + ".attenuation_quadratic", 0.032f);
     }
-
-    // spotlight properties
-    // positions and directions are defined on the go
-    shader_->setUniform("spot_light.cut_off", glm::cos(glm::radians(12.5f)));
-    shader_->setUniform("spot_light.outer_cut_off", glm::cos(glm::radians(18.0f)));
-    
-    // color components
-    shader_->setUniform("spot_light.ambient", glm::vec3(0.2f));
-    shader_->setUniform("spot_light.diffuse", glm::vec3(0.0f, 0.5f, 0.5f));
-    shader_->setUniform("spot_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
 void Photographer::drawMainObjects_()
@@ -178,10 +168,6 @@ void Photographer::drawMainObjects_()
     shader_->setUniform("view", camera_->getGlViewMatrix());
     shader_->setUniform("projection", camera_->getGlProjectionMatrix());
     shader_->setUniform("eye_pos", camera_->getPosition());
-
-    // light
-    shader_->setUniform("spot_light.direction", camera_->getFrontVector());
-    shader_->setUniform("spot_light.position", camera_->getPosition());
 
     // draw 
     glBindVertexArray(this->object_vertex_array_);
