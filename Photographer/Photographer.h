@@ -40,9 +40,9 @@ public:
     void setObject(GeneralMesh* object);
 
 private:
-    static constexpr const char* const vertex_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/VertexShader.glsl";
-    static constexpr const char const * fragment_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/FragmentShader.glsl";
-    static constexpr const char const * light_fragment_shader_path_ = "C:/Users/Maria/MyDocs/opengl_edu/Photographer/Photographer/Shaders/LightFragmentShader.glsl";
+    static constexpr const char* const vertex_shader_path_ = "./Shaders/VertexShader.glsl";
+    static constexpr const char const * fragment_shader_path_ = "./Shaders/FragmentShader.glsl";
+
     // Scene preparation
     void createObjectVAO_();
     void createShaders_();
