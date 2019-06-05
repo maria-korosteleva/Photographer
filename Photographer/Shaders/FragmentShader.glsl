@@ -43,7 +43,6 @@ struct SpotLight
 out vec4 frag_color;
 
 // From Vertex shader
-in vec2 vs_tex_coord;
 in vec3 vs_normal;
 in vec3 vs_frag_position;  // in world coordinates
 
