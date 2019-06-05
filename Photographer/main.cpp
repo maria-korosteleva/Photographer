@@ -5,7 +5,7 @@
 
 int main()
 {
-    GeneralMesh object("D:/Data/smpl_outs/pose_00048_270_dyna_thin.obj");
+    GeneralMesh object("D:/Data/SketchFab/Sexy Girl.obj");
 
     std::cout << "Mesh Loaded!" << std::endl;
 

@@ -51,7 +51,7 @@ uniform Material material;
 uniform vec3 eye_pos;
 
 uniform DirectionalLight directional_light;
-#define NR_POINT_LIGHTS 4
+#define NR_POINT_LIGHTS 2
 uniform PointLight point_lights[NR_POINT_LIGHTS];
 
 // calculators

@@ -44,7 +44,7 @@ int Photographer::run()
         this->processInput_(window);
 
         // Backgournd render commands
-        glClearColor(0.6f, 0.6f, 0.6f, 1.0f);   // state-setting function
+        glClearColor(0.85f, 0.8f, 0.8f, 1.0f);   // state-setting function
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);       // state-using function
 
         // Draw
@@ -137,10 +137,16 @@ void Photographer::setUpObjectColor_()
 void Photographer::setUpLight_()
 {
     // directional
-    shader_->setUniform("directional_light.direction", dir_light_);
+    shader_->setUniform("directional_light.direction", glm::vec3(-0.2f, -1.0f, -0.5f));
     shader_->setUniform("directional_light.ambient", glm::vec3(0.2f));
-    shader_->setUniform("directional_light.diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
+    shader_->setUniform("directional_light.diffuse", glm::vec3(0.6f, 0.6f, 0.6f));
     shader_->setUniform("directional_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
+    static const std::size_t kPointLights = 2;
+    glm::vec3 point_light_positions[kPointLights] = {
+        glm::vec3(0.7f,  0.2f,  2.0f),
+        glm::vec3(0.0f,  0.0f, -3.0f)
+    };
 
     // point lights
     for (int i = 0; i < kPointLights; ++i)
@@ -148,7 +154,7 @@ void Photographer::setUpLight_()
         std::string name = "point_lights[";
         name += std::to_string(i) + ']';
 
-        shader_->setUniform(name + ".position", point_light_positions_[i]);
+        shader_->setUniform(name + ".position", point_light_positions[i]);
 
         shader_->setUniform(name + ".ambient", glm::vec3(0.2f));
         shader_->setUniform(name + ".diffuse", glm::vec3(0.5f, 0.5f, 0.5f));
@@ -176,7 +182,7 @@ void Photographer::drawMainObjects_()
     {
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, cube_positions_[i]);
-        if (i % 3 == 0)
+        if (i % 3 == 1)
         {
             model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
         }
