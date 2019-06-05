@@ -49,6 +49,7 @@ private:
     void setUpLight_();
 
     // called every frame
+    void clearBackground_();
     void drawMainObjects_();
 
     // context set-up

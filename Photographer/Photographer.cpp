@@ -41,11 +41,9 @@ int Photographer::run()
     while (!glfwWindowShouldClose(window))
     {
         // TUTORIAL input
-        this->processInput_(window);
-
-        // Backgournd render commands
-        glClearColor(0.85f, 0.8f, 0.8f, 1.0f);   // state-setting function
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);       // state-using function
+        processInput_(window);
+        
+        clearBackground_();
 
         // Draw
         drawMainObjects_();
@@ -129,9 +127,12 @@ void Photographer::setUpObjectColor_()
 {
     shader_->use();
 
-    shader_->setUniform("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-    shader_->setUniform("material.specular", glm::vec3(0.5f, 0.5f, 0.5f)); 
-    shader_->setUniform("material.shininess", 128.0f);
+    //glm::vec3 color = glm::vec3(1.0f, 0.5f, 0.31f);  coral
+    glm::vec3 color = glm::vec3(0.6f, 0.6f, 0.6f);
+
+    shader_->setUniform("material.diffuse", color);
+    shader_->setUniform("material.specular", 0.3f * color);
+    shader_->setUniform("material.shininess", 64.0f);
 }
 
 void Photographer::setUpLight_()
@@ -139,13 +140,13 @@ void Photographer::setUpLight_()
     // directional
     shader_->setUniform("directional_light.direction", glm::vec3(-0.2f, -1.0f, -0.5f));
     shader_->setUniform("directional_light.ambient", glm::vec3(0.2f));
-    shader_->setUniform("directional_light.diffuse", glm::vec3(0.6f, 0.6f, 0.6f));
+    shader_->setUniform("directional_light.diffuse", glm::vec3(0.7f, 0.7f, 0.7f));
     shader_->setUniform("directional_light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
 
     static const std::size_t kPointLights = 2;
     glm::vec3 point_light_positions[kPointLights] = {
         glm::vec3(0.7f,  0.2f,  2.0f),
-        glm::vec3(0.0f,  0.0f, -3.0f)
+        glm::vec3(0.0f,  0.0f, -2.0f)
     };
 
     // point lights
@@ -164,6 +165,13 @@ void Photographer::setUpLight_()
         shader_->setUniform(name + ".attenuation_linear", 0.09f);
         shader_->setUniform(name + ".attenuation_quadratic", 0.032f);
     }
+}
+
+void Photographer::clearBackground_()
+{
+    //glClearColor(0.85f, 0.8f, 0.8f, 1.0f);   // state-setting function
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);   // state-setting function
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);       // state-using function
 }
 
 void Photographer::drawMainObjects_()
