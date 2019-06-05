@@ -20,7 +20,6 @@
 #include "Shader.h"
 #include "Camera.h"
 
-
 // #define __APPLE__    // uncomment this statement to fix compilation on Mac OS X
 
 class Photographer
@@ -32,7 +31,7 @@ public:
     static bool first_mouse_;
     static float fov_;
 
-    Photographer();
+    Photographer(GeneralMesh* target_object);
     ~Photographer();
 
     int run();

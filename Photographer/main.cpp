@@ -1,8 +1,3 @@
-#define MY
-#ifndef MY
-
-// ----------------------------------------------------------------------------------
-#else
 #include "Photographer.h"
 #include <GK-Undressing-People-Ceres/GeneralMesh.h>
 
@@ -14,11 +9,6 @@ int main()
 
     std::cout << "Mesh Loaded!" << std::endl;
 
-    //std::cout << object.getGLNormalizedVertices().size() << std::endl;
-
-    Photographer photographer;
-    photographer.setObject(&object);
+    Photographer photographer(&object);
     return photographer.run();
 }
-
-#endif // !1

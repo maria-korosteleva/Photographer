@@ -8,7 +8,8 @@ float Photographer::lastY_ = 300;
 bool Photographer::first_mouse_ = true;
 Camera* Photographer::camera_ = nullptr;
 
-Photographer::Photographer()
+Photographer::Photographer(GeneralMesh* target_object)
+    : object_(target_object)
 {
 }
 
