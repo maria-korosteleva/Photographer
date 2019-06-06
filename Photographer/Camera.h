@@ -40,15 +40,21 @@ public:
     glm::vec3 getPosition() { return position_; }
     glm::vec3 getFrontVector() { return front_; }
 
+    unsigned int getID() { return ID_; }
+
 private:
+    static unsigned int avalible_camera_id;
     static constexpr float default_fov_ = 45.0f;
-    // TUTORIAL
+    // manipulation
     static constexpr float rotation_sensitivity_ = 0.05f;
     static constexpr float zoom_sensitivity_ = 0.01f;
     static constexpr float movement_speed_ = 2.5f;
 
     // Calculates the front vector from the Camera's (updated) Euler Angles
     void updateCameraRotation_();
+
+    // ID
+    unsigned int ID_;
 
     // extrinsic
     glm::vec3 position_;

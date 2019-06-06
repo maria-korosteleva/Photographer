@@ -55,30 +55,61 @@ void Photographer::viewScene()
 
 void Photographer::renderToImages(const std::string path)
 {
-    // prepare
+    bool default_camera = false;
+    if (image_cameras_.size() == 0)
+    {
+        std::cout << 
+            "WARNING::RENDER TO FILE:: No Cameras Set; using default camera. Use addCameraToPosition() to set up cameras" 
+            << std::endl;
+        Camera camera(win_width_, win_height_);
+        camera.setPosition(default_camera_position_);
+        image_cameras_.push_back(camera);
+
+        default_camera = true;
+    }
+
     GLFWwindow* window = initWindowContext_(false);
     initCustomBuffer_();
 
     setUpScene_();
 
-    view_camera_ = new Camera(win_width_, win_height_);
-    view_camera_->setPosition(default_camera_position_);
+    for (auto &&camera: image_cameras_)
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
 
-    // render
-    clearBackground_();
-    cameraParamsToShader_(*shader_, *view_camera_);
-    drawMainObjects_(*shader_);
+        // render
+        clearBackground_();
+        cameraParamsToShader_(*shader_, camera);
+        drawMainObjects_(*shader_);
 
-    // Switch to default & save 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    saveRGBTexToFile(path + "/view_0.png", texture_color_buffer_);
+        // Switch to default & save 
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        saveRGBTexToFile(path + "/view_" + std::to_string(camera.getID()) + ".png",
+            texture_color_buffer_);
+    }
 
     cleanAndCloseContext_();
+
+    if (default_camera)
+    {
+        image_cameras_.pop_back();
+    }
 }
 
 void Photographer::setObject(GeneralMesh * object)
 {
     object_ = object;
+}
+
+void Photographer::addCameraToPosition(float x, float y, float z)
+{
+    Camera camera(win_width_, win_height_);
+    camera.setPosition(glm::vec3(x, y, z));
+    // set target mode
+
+    image_cameras_.push_back(camera);
+
+    std::cout << "Size: " << image_cameras_.size();
 }
 
 void Photographer::setUpScene_()

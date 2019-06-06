@@ -1,9 +1,13 @@
 #include "Camera.h"
 
+unsigned int Camera::avalible_camera_id = 1000;
 
 Camera::Camera(int screen_width, int screen_height, float field_of_view)
     :screen_width_(screen_width), screen_height_(screen_height), field_of_view_(field_of_view)
 {
+    ID_ = Camera::avalible_camera_id;
+    Camera::avalible_camera_id++;
+
     position_ = glm::vec3(0.0f, 0.0f, 0.0f);
     yaw_ = -90.0f;
     pitch_ = 0.0f;

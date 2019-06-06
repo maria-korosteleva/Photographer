@@ -33,6 +33,7 @@ public:
     void renderToImages(const std::string path = "./");
 
     void setObject(GeneralMesh* object);
+    void addCameraToPosition(float x, float y, float z);
 
 private:
     static constexpr const char* const vertex_shader_path_ = "./Shaders/VertexShader.glsl";
@@ -67,11 +68,10 @@ private:
     static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
     
     // Vars ------------------------------
-     
     // tools
     Shader* shader_ = nullptr;
     glm::vec3 default_camera_position_ = glm::vec3(0.0f, 0.0f, 4.0f);
-    std::vector<Camera> image_cameras;
+    std::vector<Camera> image_cameras_;
     static Camera* view_camera_;
 
     // appearence control
