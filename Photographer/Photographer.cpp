@@ -370,6 +370,7 @@ void Photographer::saveRGBTexToFile(const std::string filename, unsigned int tex
     std::vector<unsigned char> image(width *  height * n_channels);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, image.data());
 
+    stbi_flip_vertically_on_write(true);    // Gl texture coord system is upside down
     int success = stbi_write_png(filename.c_str(), width, height, n_channels, image.data(), 0);
 
     if (!success)
