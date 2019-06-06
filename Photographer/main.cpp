@@ -11,6 +11,7 @@ int main()
 
     Photographer photographer(&object);
 
-    //photographer.viewScene();
     photographer.renderToImages("./images/");
+
+    photographer.viewScene();
 }

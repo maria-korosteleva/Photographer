@@ -39,6 +39,7 @@ private:
     static constexpr const char const * fragment_shader_path_ = "./Shaders/FragmentShader.glsl";
 
     // Scene preparation
+    void setUpScene_();
     void createObjectVAO_();
     void createShaders_();
     void setUpObjectColor_();
@@ -46,7 +47,8 @@ private:
 
     // called every frame
     void clearBackground_();
-    void drawMainObjects_();
+    void cameraParamsToShader_(Shader& shader, Camera& camera);
+    void drawMainObjects_(Shader& shader);
 
     // context set-up
     GLFWwindow* initWindowContext_(bool visible);
@@ -68,7 +70,9 @@ private:
      
     // tools
     Shader* shader_ = nullptr;
-    static Camera* camera_;
+    glm::vec3 default_camera_position_ = glm::vec3(0.0f, 0.0f, 4.0f);
+    std::vector<Camera> image_cameras;
+    static Camera* view_camera_;
 
     // appearence control
     float win_width_ = 800;

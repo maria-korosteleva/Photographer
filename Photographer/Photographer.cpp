@@ -6,7 +6,7 @@
 float Photographer::lastX_ = 400;
 float Photographer::lastY_ = 300;
 bool Photographer::first_mouse_ = true;
-Camera* Photographer::camera_ = nullptr;
+Camera* Photographer::view_camera_ = nullptr;
 
 Photographer::Photographer(GeneralMesh* target_object)
     : object_(target_object)
@@ -22,15 +22,10 @@ void Photographer::viewScene()
     GLFWwindow* window = initWindowContext_(true);
     registerCallbacks_(window);
     
-    // The scene
-    createObjectVAO_();
-    createShaders_();
-    setUpObjectColor_();
-    setUpLight_();
+    setUpScene_();
 
-    // Camera
-    camera_ = new Camera(win_width_, win_height_);
-    camera_->setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
+    view_camera_ = new Camera(win_width_, win_height_);
+    view_camera_->setPosition(default_camera_position_);
 
     // operating the view
     Photographer::lastX_ = 400;
@@ -40,23 +35,19 @@ void Photographer::viewScene()
 
     while (!glfwWindowShouldClose(window))
     {
-        // TUTORIAL input
-        processInput_(window);
-        
-        clearBackground_();
-
-        // Draw
-        drawMainObjects_();
-
-        // ----- finish
-        // swap the buffers and check all call events
-        glfwSwapBuffers(window);
-        glfwPollEvents();
-
-        // rendering time
         float currentFrame = glfwGetTime();
         delta_time_ = currentFrame - last_frame_time_;
         last_frame_time_ = currentFrame;
+
+        processInput_(window);
+        
+        clearBackground_();
+        cameraParamsToShader_(*shader_, *view_camera_);
+        drawMainObjects_(*shader_);
+
+        // ----- finish
+        glfwSwapBuffers(window);
+        glfwPollEvents();
     }
 
     cleanAndCloseContext_();
@@ -64,34 +55,38 @@ void Photographer::viewScene()
 
 void Photographer::renderToImages(const std::string path)
 {
+    // prepare
     GLFWwindow* window = initWindowContext_(false);
     initCustomBuffer_();
 
-    // The scene
-    createObjectVAO_();
-    createShaders_();
-    setUpObjectColor_();
-    setUpLight_();
+    setUpScene_();
 
-    // Camera
-    camera_ = new Camera(win_width_, win_height_);
-    camera_->setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
+    view_camera_ = new Camera(win_width_, win_height_);
+    view_camera_->setPosition(default_camera_position_);
 
-    // draw
+    // render
     clearBackground_();
-    drawMainObjects_();
+    cameraParamsToShader_(*shader_, *view_camera_);
+    drawMainObjects_(*shader_);
 
-    // Switch to default. Should be done before binding the texture
+    // Switch to default & save 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     saveRGBTexToFile(path + "/view_0.png", texture_color_buffer_);
 
-    // cleaning
     cleanAndCloseContext_();
 }
 
 void Photographer::setObject(GeneralMesh * object)
 {
     object_ = object;
+}
+
+void Photographer::setUpScene_()
+{
+    createObjectVAO_();
+    createShaders_();
+    setUpObjectColor_();
+    setUpLight_();
 }
 
 void Photographer::createObjectVAO_()
@@ -200,16 +195,17 @@ void Photographer::clearBackground_()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);       // state-using function
 }
 
-void Photographer::drawMainObjects_()
+void Photographer::cameraParamsToShader_(Shader& shader, Camera& camera)
 {
-    shader_->use();
+    shader.use();
+    shader.setUniform("view", camera.getGlViewMatrix());
+    shader.setUniform("projection", camera.getGlProjectionMatrix());
+    shader.setUniform("eye_pos", camera.getPosition());
+}
 
-    // camera
-    shader_->setUniform("view", camera_->getGlViewMatrix());
-    shader_->setUniform("projection", camera_->getGlProjectionMatrix());
-    shader_->setUniform("eye_pos", camera_->getPosition());
-
-    // draw 
+void Photographer::drawMainObjects_(Shader& shader)
+{
+    shader.use();
     glBindVertexArray(this->object_vertex_array_);
    
     for (int i = 0; i < num_cubes_; ++i)
@@ -225,8 +221,8 @@ void Photographer::drawMainObjects_()
             float angle = 20.0f * i;
             model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
         }
-        shader_->setUniform("model", model);
-        shader_->setUniform("normal_matrix", glm::transpose(glm::inverse(model)));
+        shader.setUniform("model", model);
+        shader.setUniform("normal_matrix", glm::transpose(glm::inverse(model)));
         glDrawElements(GL_TRIANGLES, object_->getFaces().size(), GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
     }
 }
@@ -345,10 +341,10 @@ void Photographer::cleanAndCloseContext_()
         shader_ = nullptr;
     }
     
-    if (camera_ != nullptr)
+    if (view_camera_ != nullptr)
     {
-        delete camera_;
-        camera_ = nullptr;
+        delete view_camera_;
+        view_camera_ = nullptr;
     }
 
     glfwTerminate();
@@ -403,13 +399,13 @@ void Photographer::processInput_(GLFWwindow * window)
 
     // camera control
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera_->movePosition(camera_->FORWARD, delta_time_);
+        view_camera_->movePosition(view_camera_->FORWARD, delta_time_);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera_->movePosition(camera_->BACKWARD, delta_time_);
+        view_camera_->movePosition(view_camera_->BACKWARD, delta_time_);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera_->movePosition(camera_->LEFT, delta_time_);
+        view_camera_->movePosition(view_camera_->LEFT, delta_time_);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera_->movePosition(camera_->RIGHT, delta_time_);
+        view_camera_->movePosition(view_camera_->RIGHT, delta_time_);
 }
 
 void Photographer::framebufferSizeCallback_(GLFWwindow * window, int width, int height)
@@ -431,10 +427,10 @@ void Photographer::mouseCallback(GLFWwindow * window, double xpos, double ypos)
     lastX_ = xpos;
     lastY_ = ypos;
 
-    camera_->updateRotation(yoffset, xoffset);
+    view_camera_->updateRotation(yoffset, xoffset);
 }
 
 void Photographer::scrollCallback(GLFWwindow * window, double xoffset, double yoffset)
 {
-    camera_->zoom(yoffset);
+    view_camera_->zoom(yoffset);
 }
