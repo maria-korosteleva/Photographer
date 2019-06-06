@@ -10,5 +10,7 @@ int main()
     std::cout << "Mesh Loaded!" << std::endl;
 
     Photographer photographer(&object);
-    return photographer.run();
+
+    //photographer.viewScene();
+    photographer.renderToImages("./images/");
 }

@@ -9,6 +9,7 @@
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
 #include <stb/stb_image.h>
+#include <stb/stb_image_write.h>
 // math
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -25,16 +26,11 @@
 class Photographer
 {
 public:
-    // TUTORIAL keep track of the mouse
-    static float yaw_, pitch_;
-    static float lastX_, lastY_;
-    static bool first_mouse_;
-    static float fov_;
-
     Photographer(GeneralMesh* target_object);
     ~Photographer();
 
-    int run();
+    void viewScene();
+    void renderToImages(const std::string path = "./");
 
     void setObject(GeneralMesh* object);
 
@@ -53,26 +49,23 @@ private:
     void drawMainObjects_();
 
     // context set-up
-    GLFWwindow* initWindowContext_();
+    GLFWwindow* initWindowContext_(bool visible);
+    void initCustomBuffer_();
     void registerCallbacks_(GLFWwindow* window);
     void cleanAndCloseContext_();
+
+    // saver!
+    void saveRGBTexToFile(const std::string filename, unsigned int texture_id);
     
-    // TUTORIAL
     // View Control
     void processInput_(GLFWwindow *window);
     // callbacks should be static!
     static void framebufferSizeCallback_(GLFWwindow* window, int width, int height);
     static void mouseCallback(GLFWwindow* window, double xpos, double ypos);
     static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-
-    // target
-    GeneralMesh* object_;
     
-    // running ids
-    unsigned int object_vertex_array_ = 0;
-    unsigned int object_vertex_buffer_ = 0;
-    unsigned int object_element_buffer_ = 0;
-    
+    // Vars ------------------------------
+     
     // tools
     Shader* shader_ = nullptr;
     static Camera* camera_;
@@ -81,9 +74,24 @@ private:
     float win_width_ = 800;
     float win_height_ = 600;
 
-    // lighting
+    // target
+    GeneralMesh* object_;
+    unsigned int object_vertex_array_ = 0;
+    unsigned int object_vertex_buffer_ = 0;
+    unsigned int object_element_buffer_ = 0;
+
+    // custom buffers
+    unsigned int framebuffer_ = 0;
+    unsigned int texture_color_buffer_ = 0;
+    unsigned int depth_render_buffer_ = 0;
+
+    // keep track of the mouse
+    static float yaw_, pitch_;
+    static float lastX_, lastY_;
+    static bool first_mouse_;
+    static float fov_;
     
-    // TUTORIAL keep track of rendering speed for camera speed adjustment
+    // keep track of rendering speed for camera speed adjustment
     float delta_time_ = 0.0f;	// Time between current frame and last frame
     float last_frame_time_ = 0.0f; // Time of last frame
 

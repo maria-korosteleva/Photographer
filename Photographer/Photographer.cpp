@@ -17,9 +17,9 @@ Photographer::~Photographer()
 {
 }
 
-int Photographer::run()
+void Photographer::viewScene()
 {
-    GLFWwindow* window = initWindowContext_();
+    GLFWwindow* window = initWindowContext_(true);
     registerCallbacks_(window);
     
     // The scene
@@ -60,7 +60,33 @@ int Photographer::run()
     }
 
     cleanAndCloseContext_();
-    return 0;
+}
+
+void Photographer::renderToImages(const std::string path)
+{
+    GLFWwindow* window = initWindowContext_(false);
+    initCustomBuffer_();
+
+    // The scene
+    createObjectVAO_();
+    createShaders_();
+    setUpObjectColor_();
+    setUpLight_();
+
+    // Camera
+    camera_ = new Camera(win_width_, win_height_);
+    camera_->setPosition(glm::vec3(0.0f, 0.0f, 4.0f));
+
+    // draw
+    clearBackground_();
+    drawMainObjects_();
+
+    // Switch to default. Should be done before binding the texture
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    saveRGBTexToFile(path + "/view_0.png", texture_color_buffer_);
+
+    // cleaning
+    cleanAndCloseContext_();
 }
 
 void Photographer::setObject(GeneralMesh * object)
@@ -205,7 +231,7 @@ void Photographer::drawMainObjects_()
     }
 }
 
-GLFWwindow* Photographer::initWindowContext_()
+GLFWwindow* Photographer::initWindowContext_(bool visible)
 {
     glfwInit();
 
@@ -213,6 +239,11 @@ GLFWwindow* Photographer::initWindowContext_()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    if (!visible)
+    {
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+    }
 
 #ifdef __APPLE__
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // uncomment this statement to fix compilation on OS X
@@ -246,25 +277,121 @@ GLFWwindow* Photographer::initWindowContext_()
     return window;
 }
 
+void Photographer::initCustomBuffer_()
+{
+    // create framebuffer
+    if (!framebuffer_)
+    {
+        glGenFramebuffers(1, &framebuffer_);
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
+    }   
+    else // or just reuse previous framebuffer
+    {
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
+    }
+
+    if (!texture_color_buffer_)
+    {
+        glGenTextures(1, &texture_color_buffer_);
+        glBindTexture(GL_TEXTURE_2D, texture_color_buffer_);
+        // dimention should match current Viewport dimentions (call glViewport if the change is needed)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, win_width_, win_height_, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        // attach to framebuffer
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture_color_buffer_, 0);
+    } // or reuse
+    
+    if (!depth_render_buffer_)
+    {
+        glGenRenderbuffers(1, &depth_render_buffer_);
+        glBindRenderbuffer(GL_RENDERBUFFER, depth_render_buffer_);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, win_width_, win_height_);
+
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, depth_render_buffer_);
+        glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    }
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        std::cout << "ERROR::RenderToImage:: Framebuffer is not complete!" << std::endl;
+    }
+}
+
+void Photographer::cleanAndCloseContext_()
+{
+    // object-related. Should always be there
+    glDeleteVertexArrays(1, &object_vertex_array_);
+    glDeleteBuffers(1, &object_vertex_buffer_);
+    glDeleteBuffers(1, &object_element_buffer_);
+    object_vertex_array_ = object_element_buffer_ = object_vertex_buffer_ = 0;
+
+    if (framebuffer_)
+    {
+        glDeleteFramebuffers(1, &framebuffer_);
+        framebuffer_ = 0;
+    }
+    if (texture_color_buffer_)
+    {
+        glDeleteTextures(1, &texture_color_buffer_);
+        texture_color_buffer_ = 0;
+    }
+
+    if (shader_ != nullptr)
+    {
+        delete shader_;
+        shader_ = nullptr;
+    }
+    
+    if (camera_ != nullptr)
+    {
+        delete camera_;
+        camera_ = nullptr;
+    }
+
+    glfwTerminate();
+}
+
+void Photographer::saveRGBTexToFile(const std::string filename, unsigned int texture_id)
+{
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+    int width, height, n_channels, internal_format;
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+    glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_INTERNAL_FORMAT, &internal_format);
+
+    if (internal_format == GL_RGB) n_channels = 3;
+    else if (internal_format == GL_RGBA) n_channels = 4;
+    else
+    {
+        std::cout << "ERROR::WRITING TEXTURE TO FILE::Unknown texture format " << internal_format << std::endl;
+    }
+
+    std::vector<unsigned char> image(width *  height * n_channels);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGB, GL_UNSIGNED_BYTE, image.data());
+
+    int success = stbi_write_png(filename.c_str(), width, height, n_channels, image.data(), 0);
+
+    if (!success)
+    {
+        // don't know how to get the failure reason info
+        std::cout << "ERROR::WRITING TEXTURE TO FILE::Failed to save png." 
+            << "Check that the path specified exists:" << std::endl
+            << filename << std::endl;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+}
+
 void Photographer::registerCallbacks_(GLFWwindow * window)
 {
     glfwSetFramebufferSizeCallback(window, Photographer::framebufferSizeCallback_);
     glfwSetCursorPosCallback(window, Photographer::mouseCallback);
     glfwSetScrollCallback(window, Photographer::scrollCallback);
-}
-
-void Photographer::cleanAndCloseContext_()
-{
-    glDeleteVertexArrays(1, &object_vertex_array_);
-    glDeleteBuffers(1, &object_vertex_buffer_);
-    glDeleteBuffers(1, &object_element_buffer_);
-    delete shader_;
-    delete camera_;
-    glfwTerminate();
-
-    shader_ = nullptr;
-    camera_ = nullptr;
-    object_vertex_array_ = object_element_buffer_ = object_vertex_buffer_ = 0;
 }
 
 void Photographer::processInput_(GLFWwindow * window)
