@@ -144,7 +144,7 @@ void Camera::zoom(float delta)
 void Camera::saveParamsForOpenCV(const std::string path)
 {
     glm::mat4 extrinsic = glm::transpose(getGlViewMatrix()); // transposed because of the colomn-wise storage
-    glm::mat3 intrinsics = glm::transpose(getCVIntrinsicsMatrix());
+    glm::mat3 intrinsics = getCVIntrinsicsMatrix();
 
     // very hardcore approach. But no new dependencies!
     std::ofstream xml_file;
