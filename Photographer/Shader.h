@@ -43,10 +43,9 @@ class Shader
 
     // default shaders
     const char *default_vertex_shader_source_ = SHADER_CODE_GLSL_TO_STRING(330,
+
         layout(location = 0) in vec3 aPos;
         layout(location = 1) in vec3 aColor;
-
-        out vec3 ourColor;
 
         void main()
         {
@@ -57,10 +56,10 @@ class Shader
 
     const char *default_fragment_shader_source_ = SHADER_CODE_GLSL_TO_STRING(460,
         out vec4 FragColor;
-        in vec4 ourColor;
+
         void main()
         {
-            FragColor = ourColor;
+            FragColor = vec4(1.0, 0.9, 0.9, 1.0);
         }
     );
 };

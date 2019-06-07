@@ -45,8 +45,9 @@ void Photographer::viewScene()
         
         clearBackground_();
         cameraParamsToShader_(*shader_, *view_camera_);
+        cameraParamsToShader_(*simple_shader_, *view_camera_);
         drawMainObject_(*shader_);
-        drawImageCameraObjects_(*shader_);
+        drawImageCameraObjects_(*simple_shader_);
 
         // ----- finish
         glfwSwapBuffers(window);
@@ -220,6 +221,9 @@ void Photographer::createShaders_()
 {
     if (shader_ != nullptr) delete shader_;
     shader_ = new Shader(vertex_shader_path_, fragment_shader_path_);
+
+    if (simple_shader_ != nullptr) delete simple_shader_;
+    simple_shader_ = new Shader(vertex_shader_path_);   // use default fragment shader
 }
 
 void Photographer::setUpTargetObjectColor_()
@@ -318,7 +322,7 @@ void Photographer::drawImageCameraObjects_(Shader & shader)
 
         shader.setUniform("model", model);
         shader.setUniform("normal_matrix", glm::transpose(glm::inverse(model)));
-        glDrawElements(GL_TRIANGLES, object_->getFaces().size(), GL_UNSIGNED_INT, 0); 
+        glDrawElements(GL_TRIANGLES, camera_model_faces_num_ * 3, GL_UNSIGNED_INT, 0); 
     }
 }
 
@@ -440,6 +444,12 @@ void Photographer::cleanAndCloseContext_()
     {
         delete shader_;
         shader_ = nullptr;
+    }
+
+    if (simple_shader_ != nullptr)
+    {
+        delete simple_shader_;
+        simple_shader_ = nullptr;
     }
     
     if (view_camera_ != nullptr)

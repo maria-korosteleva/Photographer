@@ -75,7 +75,9 @@ private:
     
     // Vars ------------------------------
     // tools
+    // pointers are used to init shader later than in constructor
     Shader* shader_ = nullptr;
+    Shader* simple_shader_ = nullptr;
     glm::vec3 default_camera_position_ = glm::vec3(0.0f, 0.0f, 4.0f);
     std::vector<Camera> image_cameras_;
     static Camera* view_camera_;
