@@ -31,6 +31,25 @@ glm::mat4 Camera::getGlProjectionMatrix()
     return glm::perspective(glm::radians(field_of_view_y_), screen_width_ / screen_height_, 0.1f, 100.0f);
 }
 
+glm::mat3 Camera::getCVIntrinsicsMatrix()
+{
+    glm::mat3 intrinsics = glm::mat3(1.0f);  // identity
+
+    //float ratio = screen_width_ / screen_height_;
+
+    // tan(fov_x) = ratio * tan(fov_y)
+    // float pix_focal_x = screen_width_ / (2 * ratio * tan(glm::radians(field_of_view_y_) / 2));
+    // same for x and y, since we assume that apperture ratio matches the output image aspect ratio
+    float pix_focal = screen_height_ / (2 * tan(glm::radians(field_of_view_y_) / 2));
+
+    intrinsics[0][0] = pix_focal;
+    intrinsics[1][1] = pix_focal;
+    intrinsics[0][2] = screen_width_ / 2;
+    intrinsics[1][2] = screen_height_ / 2;
+
+    return intrinsics;
+}
+
 void Camera::setPosition(glm::vec3 pos)
 {
     position_ = pos;
@@ -124,48 +143,61 @@ void Camera::zoom(float delta)
 
 void Camera::saveParamsForOpenCV(const std::string path)
 {
-    std::cout << ID_ << ":" << std::endl;
+    glm::mat4 extrinsic = glm::transpose(getGlViewMatrix()); // transposed because of the colomn-wise storage
+    glm::mat3 intrinsics = getCVIntrinsicsMatrix();
 
-    // get extrinsic matrix -- same as the view -- or inverse?
-    glm::mat4 extrinsic = getGlViewMatrix();
+    // very hardcore approach. But no new dependencies!
+    std::ofstream xml_file;
+    xml_file.open(path + "/" + std::to_string(ID_) + ".xml");
 
-    std::cout << "Extrinsic :" << std::endl;
-    for (int i = 0; i < 4; ++i)
-    {
-        for (int j = 0; j < 4; ++j)
-        {
-            std::cout << extrinsic[j][i] << ", ";
-        }
-        std::cout << std::endl;
-    }
+    xml_file << "<?xml version=\"1.0\"?>" << std::endl
+        << "<opencv_storage>" << std::endl;
 
-    // calc intrinsic matrix
-    glm::mat3 intrinsic = glm::mat3(1.0f);  // identity
-
-    //float ratio = screen_width_ / screen_height_;
-
-    // tan(fov_x) = ratio * tan(fov_y)
-    // float pix_focal_x = screen_width_ / (2 * ratio * tan(glm::radians(field_of_view_y_) / 2));
-    // same for x and y, since we assume that apperture ratio matches the output image aspect ratio
-    float pix_focal = screen_height_ / (2 * tan(glm::radians(field_of_view_y_) / 2));
-
-    intrinsic[0][0] = pix_focal;
-    intrinsic[1][1] = pix_focal;
-    intrinsic[0][2] = screen_width_ / 2;
-    intrinsic[1][2] = screen_height_ / 2;
-
-    std::cout << "Intrinsic :" << std::endl;
+    // extrinsic
+    xml_file << "<CameraMatrix type_id=\"opencv-matrix\">" << std::endl
+        << "\t<rows>3</rows>" << std::endl
+        << "\t<cols>4</cols>" << std::endl
+        << "\t<dt>d</dt>" << std::endl
+        << "\t<data>" << std::endl;
     for (int i = 0; i < 3; ++i)
     {
+        xml_file << "\t\t";
+        for (int j = 0; j < 4; ++j)
+        {
+            xml_file << extrinsic[i][j] << " ";     
+        }
+        xml_file << std::endl;
+    }
+    xml_file << "\t</data>\n</CameraMatrix>" << std::endl;
+    
+    xml_file << "<Intrinsics type_id=\"opencv-matrix\">" << std::endl
+        << "\t<rows>3</rows>" << std::endl
+        << "\t<cols>3</cols>" << std::endl
+        << "\t<dt>d</dt>" << std::endl
+        << "\t<data>" << std::endl;
+
+    for (int i = 0; i < 3; ++i)
+    {
+        xml_file << "\t\t";
         for (int j = 0; j < 3; ++j)
         {
-            std::cout << intrinsic[i][j] << ", ";
+            xml_file << intrinsics[j][i] << " ";
         }
-        std::cout << std::endl;
+        xml_file << std::endl;
     }
+    
+    xml_file << "\t</data>\n</Intrinsics>" << std::endl;
 
+    // No distortion
+    xml_file << "<Distortion type_id=\"opencv-matrix\">" << std::endl
+        << "\t<rows>8</rows>" << std::endl
+        << "\t<cols>1</cols>" << std::endl
+        << "\t<dt>d</dt>" << std::endl
+        << "\t<data> 0. 0. 0. 0. 0. 0. 0. 0.</data>" << std::endl
+        << "</Distortion>" << std::endl;
 
-    // XML-saver?
+    xml_file << "</opencv_storage>" << std::endl;
+    xml_file.close();
 }
 
 void Camera::updateVectorsByRotation_()

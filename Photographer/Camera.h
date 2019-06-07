@@ -4,7 +4,9 @@
 // It also holds the projection matrix
 // Move rotations to something better
 
+#include <fstream>
 #include <iostream>
+#include <string>
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -34,7 +36,7 @@ public:
     
     glm::mat4 getGlViewMatrix();
     glm::mat4 getGlProjectionMatrix();
-    //glm::mat4 GetCVProjectionMatrix();
+    glm::mat3 getCVIntrinsicsMatrix();
 
     // allows to set pre-defined id
     void setID(unsigned int id) { ID_ = id; };
@@ -51,7 +53,7 @@ public:
 
 private:
     static unsigned int avalible_camera_id;
-    static constexpr float default_fov_ = 30.0f;
+    static constexpr float default_fov_ = 35.0f;
     // manipulation
     static constexpr float rotation_sensitivity_ = 0.05f;
     static constexpr float zoom_sensitivity_ = 0.1f;
