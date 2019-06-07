@@ -16,6 +16,7 @@ int main()
     photographer.addCameraToPosition(-1.0f, 1.0f, 3.0f);
 
     photographer.renderToImages("./images/");
+    photographer.saveImageCamerasParamsCV("./images/");
 
     photographer.viewScene();
 }

@@ -11,6 +11,8 @@ Camera* Photographer::view_camera_ = nullptr;
 Photographer::Photographer(GeneralMesh* target_object)
     : object_(target_object)
 {
+    // because we plan to use normalized coordinates, it's safe for cameras to look at the origin
+    default_camera_target_ = glm::vec3(0.0f);
 }
 
 Photographer::~Photographer()
@@ -28,8 +30,8 @@ void Photographer::viewScene()
     view_camera_->setPosition(default_camera_position_);
 
     // operating the view
-    Photographer::lastX_ = 400;
-    Photographer::lastY_ = 300;
+    Photographer::lastX_ = win_width_/2;
+    Photographer::lastY_ = win_height_/2;
     first_mouse_ = true;
     last_frame_time_ = glfwGetTime();
 
@@ -61,8 +63,7 @@ void Photographer::renderToImages(const std::string path)
         std::cout << 
             "WARNING::RENDER TO FILE:: No Cameras Set; using default camera. Use addCameraToPosition() to set up cameras" 
             << std::endl;
-        Camera camera(win_width_, win_height_);
-        camera.setPosition(default_camera_position_);
+        Camera camera = createDefaultTargetCamera_();
         image_cameras_.push_back(camera);
 
         default_camera = true;
@@ -84,7 +85,7 @@ void Photographer::renderToImages(const std::string path)
 
         // Switch to default & save 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        saveRGBTexToFile(path + "/view_" + std::to_string(camera.getID()) + ".png",
+        saveRGBTexToFile_(path + "/view_" + std::to_string(camera.getID()) + ".png",
             texture_color_buffer_);
     }
 
@@ -93,6 +94,23 @@ void Photographer::renderToImages(const std::string path)
     if (default_camera)
     {
         image_cameras_.pop_back();
+    }
+}
+
+void Photographer::saveImageCamerasParamsCV(const std::string path)
+{
+    if (image_cameras_.size() == 0)
+    {
+        std::cout << "WARNING::SAVE CAMERA PARAMETERS :: No Cameras Set; Saving parameters of the default camera" << std::endl;
+
+        Camera camera = createDefaultTargetCamera_();
+        camera.saveParamsForOpenCV(path);
+        return;
+    }
+
+    for (auto camera : image_cameras_)
+    {
+        camera.saveParamsForOpenCV(path);
     }
 }
 
@@ -106,8 +124,7 @@ void Photographer::addCameraToPosition(float x, float y, float z)
     Camera camera(win_width_, win_height_);
     camera.setPosition(glm::vec3(x, y, z));
 
-    // since we use normalized coordinates
-    camera.setTarget(glm::vec3(0.0f));
+    camera.setTarget(default_camera_target_);
 
     image_cameras_.push_back(camera);
 }
@@ -217,6 +234,15 @@ void Photographer::setUpLight_()
         shader_->setUniform(name + ".attenuation_linear", 0.09f);
         shader_->setUniform(name + ".attenuation_quadratic", 0.032f);
     }
+}
+
+Camera Photographer::createDefaultTargetCamera_()
+{
+    Camera camera(win_width_, win_height_);
+    camera.setPosition(default_camera_position_);
+    camera.setTarget(default_camera_target_);
+    camera.setID(0);
+    return camera;
 }
 
 void Photographer::clearBackground_()
@@ -381,7 +407,7 @@ void Photographer::cleanAndCloseContext_()
     glfwTerminate();
 }
 
-void Photographer::saveRGBTexToFile(const std::string filename, unsigned int texture_id)
+void Photographer::saveRGBTexToFile_(const std::string filename, unsigned int texture_id)
 {
     glBindTexture(GL_TEXTURE_2D, texture_id);
     glPixelStorei(GL_PACK_ALIGNMENT, 1);

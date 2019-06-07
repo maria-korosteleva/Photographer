@@ -31,6 +31,7 @@ public:
 
     void viewScene();
     void renderToImages(const std::string path = "./");
+    void saveImageCamerasParamsCV(const std::string path = "./");
 
     void setObject(GeneralMesh* object);
     void addCameraToPosition(float x, float y, float z);
@@ -45,6 +46,7 @@ private:
     void createShaders_();
     void setUpObjectColor_();
     void setUpLight_();
+    Camera createDefaultTargetCamera_();
 
     // called every frame
     void clearBackground_();
@@ -58,7 +60,7 @@ private:
     void cleanAndCloseContext_();
 
     // saver!
-    void saveRGBTexToFile(const std::string filename, unsigned int texture_id);
+    void saveRGBTexToFile_(const std::string filename, unsigned int texture_id);
     
     // View Control
     void processInput_(GLFWwindow *window);
@@ -75,11 +77,12 @@ private:
     static Camera* view_camera_;
 
     // appearence control
-    float win_width_ = 960;
-    float win_height_ = 540;
+    float win_width_ = 800;
+    float win_height_ = 600;
 
     // target
     GeneralMesh* object_;
+    glm::vec3 default_camera_target_;
     unsigned int object_vertex_array_ = 0;
     unsigned int object_vertex_buffer_ = 0;
     unsigned int object_element_buffer_ = 0;
@@ -93,7 +96,6 @@ private:
     static float yaw_, pitch_;
     static float lastX_, lastY_;
     static bool first_mouse_;
-    static float fov_;
     
     // keep track of rendering speed for camera speed adjustment
     float delta_time_ = 0.0f;	// Time between current frame and last frame

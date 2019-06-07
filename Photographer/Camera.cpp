@@ -3,7 +3,7 @@
 unsigned int Camera::avalible_camera_id = 1000;
 
 Camera::Camera(int screen_width, int screen_height, float field_of_view)
-    :screen_width_(screen_width), screen_height_(screen_height), field_of_view_(field_of_view)
+    :screen_width_(screen_width), screen_height_(screen_height), field_of_view_y_(field_of_view)
 {
     mode_ = FREE_MODE;
 
@@ -28,7 +28,7 @@ glm::mat4 Camera::getGlViewMatrix()
 
 glm::mat4 Camera::getGlProjectionMatrix()
 {
-    return glm::perspective(field_of_view_, screen_width_ / screen_height_, 0.1f, 100.0f);
+    return glm::perspective(glm::radians(field_of_view_y_), screen_width_ / screen_height_, 0.1f, 100.0f);
 }
 
 void Camera::setPosition(glm::vec3 pos)
@@ -114,12 +114,58 @@ void Camera::updateRotation(float delta_pitch, float delta_yaw, bool constrain_p
 
 void Camera::zoom(float delta)
 {
-    if (field_of_view_ >= 1.0f && field_of_view_ <= default_fov_)
-        field_of_view_ -= zoom_sensitivity_ * delta;
+    if (field_of_view_y_ >= 1.0f && field_of_view_y_ <= default_fov_)
+        field_of_view_y_ -= zoom_sensitivity_ * delta;
 
     // check boundaries
-    if (field_of_view_ <= 1.0f)             field_of_view_ = 1.0f;
-    if (field_of_view_ >= default_fov_)      field_of_view_ = default_fov_;
+    if (field_of_view_y_ <= 1.0f)             field_of_view_y_ = 1.0f;
+    if (field_of_view_y_ >= default_fov_)      field_of_view_y_ = default_fov_;
+}
+
+void Camera::saveParamsForOpenCV(const std::string path)
+{
+    std::cout << ID_ << ":" << std::endl;
+
+    // get extrinsic matrix -- same as the view -- or inverse?
+    glm::mat4 extrinsic = getGlViewMatrix();
+
+    std::cout << "Extrinsic :" << std::endl;
+    for (int i = 0; i < 4; ++i)
+    {
+        for (int j = 0; j < 4; ++j)
+        {
+            std::cout << extrinsic[j][i] << ", ";
+        }
+        std::cout << std::endl;
+    }
+
+    // calc intrinsic matrix
+    glm::mat3 intrinsic = glm::mat3(1.0f);  // identity
+
+    //float ratio = screen_width_ / screen_height_;
+
+    // tan(fov_x) = ratio * tan(fov_y)
+    // float pix_focal_x = screen_width_ / (2 * ratio * tan(glm::radians(field_of_view_y_) / 2));
+    // same for x and y, since we assume that apperture ratio matches the output image aspect ratio
+    float pix_focal = screen_height_ / (2 * tan(glm::radians(field_of_view_y_) / 2));
+
+    intrinsic[0][0] = pix_focal;
+    intrinsic[1][1] = pix_focal;
+    intrinsic[0][2] = screen_width_ / 2;
+    intrinsic[1][2] = screen_height_ / 2;
+
+    std::cout << "Intrinsic :" << std::endl;
+    for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j < 3; ++j)
+        {
+            std::cout << intrinsic[i][j] << ", ";
+        }
+        std::cout << std::endl;
+    }
+
+
+    // XML-saver?
 }
 
 void Camera::updateVectorsByRotation_()
@@ -138,7 +184,7 @@ void Camera::updateVectorsByRotation_()
 
 void Camera::updateFrontByTarget_()
 {
-    front_ = target_ - position_;
+    front_ = glm::normalize(target_ - position_);
 
     // re-calculate the Right and Up vector
     right_ = glm::normalize(glm::cross(front_, world_up_));
