@@ -84,8 +84,9 @@
     <SourcePath>C:\Users\Maria\MyDocs\libs\Installed_libs\src;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\Maria\MyDocs\GigaKorea\GK-Undressing-People-Ceres\;C:\Users\Maria\MyDocs\libs\eigen-eigen-5a0156e40feb;C:\Users\Maria\MyDocs\libs\libigl\include;C:\Users\Maria\MyDocs\libs\glfw\install_x64\include;$(IncludePath);C:\Users\Maria\MyDocs\libs\libigl\include</IncludePath>
+    <IncludePath>C:\Users\Maria\MyDocs\GigaKorea\GK-Undressing-People-Ceres\;C:\Users\Maria\MyDocs\libs\eigen-eigen-5a0156e40feb;C:\Users\Maria\MyDocs\libs\libigl\include;C:\Users\Maria\MyDocs\libs\glfw\install_x64\include;C:\Users\Maria\MyDocs\libs\Installed_libs\include;$(IncludePath);C:\Users\Maria\MyDocs\libs\libigl\include</IncludePath>
     <LibraryPath>C:\Users\Maria\MyDocs\libs\glfw\install_x64\lib;$(LibraryPath)</LibraryPath>
+    <SourcePath>C:\Users\Maria\MyDocs\libs\Installed_libs\src;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -140,7 +141,6 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalOptions>/D "_CRT_SECURE_NO_WARNINGS" /D "_CRT_NONSTDC_NO_DEPRECATE" %(AdditionalOptions)</AdditionalOptions>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>

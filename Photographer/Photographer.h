@@ -75,8 +75,8 @@ private:
     static Camera* view_camera_;
 
     // appearence control
-    float win_width_ = 800;
-    float win_height_ = 600;
+    float win_width_ = 960;
+    float win_height_ = 540;
 
     // target
     GeneralMesh* object_;
