@@ -5,6 +5,8 @@ unsigned int Camera::avalible_camera_id = 1000;
 Camera::Camera(int screen_width, int screen_height, float field_of_view)
     :screen_width_(screen_width), screen_height_(screen_height), field_of_view_(field_of_view)
 {
+    mode_ = FREE_MODE;
+
     ID_ = Camera::avalible_camera_id;
     Camera::avalible_camera_id++;
 
@@ -12,7 +14,7 @@ Camera::Camera(int screen_width, int screen_height, float field_of_view)
     yaw_ = -90.0f;
     pitch_ = 0.0f;
 
-    updateCameraRotation_();
+    updateVectorsByRotation_();
 }
 
 Camera::~Camera()
@@ -32,13 +34,33 @@ glm::mat4 Camera::getGlProjectionMatrix()
 void Camera::setPosition(glm::vec3 pos)
 {
     position_ = pos;
+
+    if (mode_ == TARGET_MODE)
+    {
+        updateFrontByTarget_();
+    }
 }
 
 void Camera::setRotation(float pitch, float yaw)
 {
+    if (mode_ == TARGET_MODE)
+    {
+        std::cout << "INFO:: CAMERA " << ID_ << " SWITCHED FROM TARGET MODE TO FREE ROTATION" << std::endl;
+        mode_ = FREE_MODE;
+    }
+
     pitch_ = pitch;
     yaw_ = yaw;
-    updateCameraRotation_();
+    updateVectorsByRotation_();
+}
+
+void Camera::setTarget(glm::vec3 target)
+{
+    std::cout << "INFO:: CAMERA " << ID_ << " SWITCHED FROM FREE ROTATION TO TARGET MODE" << std::endl;
+
+    mode_ = TARGET_MODE;
+    target_ = target;
+    updateFrontByTarget_();
 }
 
 void Camera::movePosition(Directions direction, float step_size_multiplier)
@@ -60,10 +82,21 @@ void Camera::movePosition(Directions direction, float step_size_multiplier)
             position_ -= right_ * velocity;
             break;
     }
+
+    if (mode_ == TARGET_MODE)
+    {
+        updateFrontByTarget_();
+    }
 }
 
 void Camera::updateRotation(float delta_pitch, float delta_yaw, bool constrain_pitch)
 {
+    if (mode_ == TARGET_MODE)
+    {
+        std::cout << "INFO:: CAMERA " << ID_ << " SWITCHED FROM TARGET MODE TO FREE ROTATION" << std::endl;
+        mode_ = FREE_MODE;
+    }
+
     delta_pitch *= rotation_sensitivity_;
     delta_yaw *= rotation_sensitivity_;
 
@@ -76,7 +109,7 @@ void Camera::updateRotation(float delta_pitch, float delta_yaw, bool constrain_p
         if (pitch_ < -89.0f) pitch_ = -89.0f;
     }
 
-    updateCameraRotation_();
+    updateVectorsByRotation_();
 }
 
 void Camera::zoom(float delta)
@@ -89,7 +122,7 @@ void Camera::zoom(float delta)
     if (field_of_view_ >= default_fov_)      field_of_view_ = default_fov_;
 }
 
-void Camera::updateCameraRotation_()
+void Camera::updateVectorsByRotation_()
 {
     // New Front vector
     glm::vec3 front;
@@ -100,5 +133,14 @@ void Camera::updateCameraRotation_()
 
     // re-calculate the Right and Up vector
     right_ = glm::normalize(glm::cross(front_, world_up_)); 
+    up_ = glm::normalize(glm::cross(right_, front_));
+}
+
+void Camera::updateFrontByTarget_()
+{
+    front_ = target_ - position_;
+
+    // re-calculate the Right and Up vector
+    right_ = glm::normalize(glm::cross(front_, world_up_));
     up_ = glm::normalize(glm::cross(right_, front_));
 }

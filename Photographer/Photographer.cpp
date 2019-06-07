@@ -105,7 +105,9 @@ void Photographer::addCameraToPosition(float x, float y, float z)
 {
     Camera camera(win_width_, win_height_);
     camera.setPosition(glm::vec3(x, y, z));
-    // set target mode
+
+    // since we use normalized coordinates
+    camera.setTarget(glm::vec3(0.0f));
 
     image_cameras_.push_back(camera);
 }

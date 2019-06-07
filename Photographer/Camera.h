@@ -19,6 +19,12 @@ public:
         LEFT,
         RIGHT
     };
+    enum Mode
+    {
+        TARGET_MODE, 
+        FREE_MODE
+    };
+
 
     Camera(int screen_width, int screen_height, float field_of_view = default_fov_);
     ~Camera();
@@ -29,7 +35,7 @@ public:
 
     void setPosition(glm::vec3 pos);
     void setRotation(float pitch, float yaw);
-    //void SetTarget(glm::vec3 target);
+    void setTarget(glm::vec3 target);
     //void SetFrontVector(glm::vec3 front);
 
     // TUTORIAL
@@ -50,11 +56,17 @@ private:
     static constexpr float zoom_sensitivity_ = 0.01f;
     static constexpr float movement_speed_ = 2.5f;
 
-    // Calculates the front vector from the Camera's (updated) Euler Angles
-    void updateCameraRotation_();
+    // Calculates the front vector 
+    // from the Camera's (updated) Euler Angles
+    void updateVectorsByRotation_();
+    // based on the target
+    void updateFrontByTarget_();
 
     // ID
     unsigned int ID_;
+
+    // mode
+    Mode mode_;
 
     // extrinsic
     glm::vec3 position_;
@@ -64,6 +76,7 @@ private:
     const glm::vec3 world_up_ = glm::vec3(0.0f, 1.0f, 0.0f);
     // extra -- rotation parameters
     float yaw_, pitch_;
+    glm::vec3 target_;
 
     // intrinsic 
     float field_of_view_;
