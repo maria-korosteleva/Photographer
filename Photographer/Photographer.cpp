@@ -45,7 +45,8 @@ void Photographer::viewScene()
         
         clearBackground_();
         cameraParamsToShader_(*shader_, *view_camera_);
-        drawMainObjects_(*shader_);
+        drawMainObject_(*shader_);
+        drawImageCameraObjects_(*shader_);
 
         // ----- finish
         glfwSwapBuffers(window);
@@ -81,7 +82,7 @@ void Photographer::renderToImages(const std::string path)
         // render
         clearBackground_();
         cameraParamsToShader_(*shader_, camera);
-        drawMainObjects_(*shader_);
+        drawMainObject_(*shader_);
 
         // Switch to default & save 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -138,46 +139,38 @@ void Photographer::addCameraToPosition(float x, float y, float z, float dist)
 
 void Photographer::setUpScene_()
 {
-    createObjectVAO_();
+    createTargetObjectVAO_();
+    createCameraObjectVAO_();
     createShaders_();
-    setUpObjectColor_();
+    setUpTargetObjectColor_();
     setUpLight_();
 }
 
-void Photographer::createObjectVAO_()
+void Photographer::createTargetObjectVAO_()
 {
-    // id avalibility check
     if (object_vertex_array_ > 0
         || object_vertex_buffer_ > 0
         || object_element_buffer_ > 0)
     {
-        // catastrofY! Want to overwrite the existing buffers!
         std::cout << "ERROR::CREATE OBJECT BUFFERS::OBJECT BUFFERS WERE ALREADY ALLOCATED. DATA IS LOST\n" << std::endl;
     }
 
-    // ------ Main (cube) object
-    // VAO allows storing the vertex attribures as an object for easy loading after
     glGenVertexArrays(1, &object_vertex_array_);
     glBindVertexArray(object_vertex_array_);
 
-    // setup vertex buffer object
+    const std::vector<GeneralMesh::GLMVertex>* verts = &object_->getGLNormalizedVertices();
     glGenBuffers(1, &object_vertex_buffer_);
     glBindBuffer(GL_ARRAY_BUFFER, object_vertex_buffer_);
-    // last parameter indicated that data won't change througout the process
-    const std::vector<GeneralMesh::GLMVertex>* verts = &object_->getGLNormalizedVertices();
-
     glBufferData(GL_ARRAY_BUFFER, 
         object_->getGLNormalizedVertices().size() * sizeof(GeneralMesh::GLMVertex),
         &object_->getGLNormalizedVertices()[0], GL_STATIC_DRAW);
 
-    // setup element buffer object -- for faces!
     glGenBuffers(1, &object_element_buffer_);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object_element_buffer_);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
         object_->getGLMFaces().size() * sizeof(unsigned int), 
         &object_->getGLMFaces()[0], GL_STATIC_DRAW);
 
-    // Vertex data interpretation guide
     // position
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GeneralMesh::GLMVertex), (void*)0);
     glEnableVertexAttribArray(0);
@@ -186,11 +179,41 @@ void Photographer::createObjectVAO_()
         (void*)offsetof(GeneralMesh::GLMVertex, GeneralMesh::GLMVertex::normal));
     glEnableVertexAttribArray(1);
 
-    // Cleaning. Unbinding is not necessary, but I'm doing this for completeness
-    // Important to unbind GL_ELEMENT_ARRAY_BUFFER after Vertex Array
+    // Cleaning
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void Photographer::createCameraObjectVAO_()
+{
+    if (cam_obj_vertex_array_ > 0
+        || cam_obj_vertex_buffer_ > 0
+        || cam_obj_element_buffer_ > 0)
+    {
+        std::cout << "ERROR::CREATE OBJECT BUFFERS::OBJECT BUFFERS WERE ALREADY ALLOCATED. DATA IS LOST\n" << std::endl;
+    }
+
+    glGenVertexArrays(1, &cam_obj_vertex_array_);
+    glBindVertexArray(cam_obj_vertex_array_);
+
+    glGenBuffers(1, &cam_obj_vertex_buffer_);
+    glBindBuffer(GL_ARRAY_BUFFER, cam_obj_vertex_buffer_);
+    glBufferData(GL_ARRAY_BUFFER, camera_model_verts_num_ * 3 * sizeof(float), 
+        camera_model_vertices_, GL_STATIC_DRAW);
+
+    glGenBuffers(1, &cam_obj_element_buffer_);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cam_obj_element_buffer_);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, camera_model_faces_num_ * 3 * sizeof(unsigned int),
+        camera_model_faces_, GL_STATIC_DRAW);
+
+    // Vertex data interpretation guide
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void Photographer::createShaders_()
@@ -199,7 +222,7 @@ void Photographer::createShaders_()
     shader_ = new Shader(vertex_shader_path_, fragment_shader_path_);
 }
 
-void Photographer::setUpObjectColor_()
+void Photographer::setUpTargetObjectColor_()
 {
     shader_->use();
 
@@ -267,27 +290,35 @@ void Photographer::cameraParamsToShader_(Shader& shader, Camera& camera)
     shader.setUniform("eye_pos", camera.getPosition());
 }
 
-void Photographer::drawMainObjects_(Shader& shader)
+void Photographer::drawMainObject_(Shader& shader)
 {
     shader.use();
     glBindVertexArray(this->object_vertex_array_);
-   
-    for (int i = 0; i < num_cubes_; ++i)
+
+    glm::mat4 model = glm::mat4(1.0f);
+
+    shader.setUniform("model", model);
+    shader.setUniform("normal_matrix", glm::transpose(glm::inverse(model)));
+    // second argument is the tot number of vertices to draw
+    glDrawElements(GL_TRIANGLES, object_->getFaces().size(), GL_UNSIGNED_INT, 0); 
+}
+
+void Photographer::drawImageCameraObjects_(Shader & shader)
+{
+    shader.use();
+    glBindVertexArray(this->cam_obj_vertex_array_);
+
+    for (auto &&camera : image_cameras_)
     {
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, cube_positions_[i]);
-        if (i % 3 == 1)
-        {
-            model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.5f));
-        }
-        else
-        {
-            float angle = 20.0f * i;
-            model = glm::rotate(model, angle, glm::vec3(1.0f, 0.3f, 0.5f));
-        }
+        glm::mat3 rotation = glm::transpose(glm::mat3(camera.getGlViewMatrix()));
+        glm::mat4 model = glm::mat4(rotation);
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        model[3] = glm::vec4(camera.getPosition(), 1.0f);
+
         shader.setUniform("model", model);
         shader.setUniform("normal_matrix", glm::transpose(glm::inverse(model)));
-        glDrawElements(GL_TRIANGLES, object_->getFaces().size(), GL_UNSIGNED_INT, 0); // second argument is the tot number of vertices to draw
+        glDrawElements(GL_TRIANGLES, object_->getFaces().size(), GL_UNSIGNED_INT, 0); 
     }
 }
 
@@ -387,6 +418,12 @@ void Photographer::cleanAndCloseContext_()
     glDeleteBuffers(1, &object_vertex_buffer_);
     glDeleteBuffers(1, &object_element_buffer_);
     object_vertex_array_ = object_element_buffer_ = object_vertex_buffer_ = 0;
+
+    // camera
+    glDeleteVertexArrays(1, &cam_obj_vertex_array_);
+    glDeleteBuffers(1, &cam_obj_vertex_buffer_);
+    glDeleteBuffers(1, &cam_obj_element_buffer_);
+    cam_obj_vertex_array_ = cam_obj_vertex_buffer_ = cam_obj_element_buffer_ = 0;
 
     if (framebuffer_)
     {

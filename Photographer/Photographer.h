@@ -44,16 +44,18 @@ private:
 
     // Scene preparation
     void setUpScene_();
-    void createObjectVAO_();
+    void createTargetObjectVAO_();
+    void createCameraObjectVAO_();
     void createShaders_();
-    void setUpObjectColor_();
+    void setUpTargetObjectColor_();
     void setUpLight_();
     Camera createDefaultTargetCamera_();
 
     // called every frame
     void clearBackground_();
     void cameraParamsToShader_(Shader& shader, Camera& camera);
-    void drawMainObjects_(Shader& shader);
+    void drawMainObject_(Shader& shader);
+    void drawImageCameraObjects_(Shader& shader);
 
     // context set-up
     GLFWwindow* initWindowContext_(bool visible);
@@ -103,19 +105,79 @@ private:
     float delta_time_ = 0.0f;	// Time between current frame and last frame
     float last_frame_time_ = 0.0f; // Time of last frame
 
-    // data from tutorial
-    static const std::size_t num_cubes_ = 10;
-    glm::vec3 cube_positions_[num_cubes_] = {
-        glm::vec3(0.0f,  0.0f,  0.0f),
-        glm::vec3(2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3(2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3(1.3f, -2.0f, -2.5f),
-        glm::vec3(1.5f,  2.0f, -2.5f),
-        glm::vec3(1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
+    // Camera Model data
+    unsigned int cam_obj_vertex_array_ = 0;
+    unsigned int cam_obj_vertex_buffer_ = 0;
+    unsigned int cam_obj_element_buffer_ = 0;
+
+    static constexpr size_t camera_model_verts_num_ = 43;
+    float camera_model_vertices_[camera_model_verts_num_ * 3] = {
+        0.0420324, 0.0856893, -0.0754958,
+        -0.178786, -0.0810147, -0.0754958,
+        -0.178786, 0.0856893, -0.0754958,
+        0.0420324, 0.0856893, -0.0754958,
+        0.0420324, -0.0810147, -0.0754958,
+        -0.178786, -0.0810147, -0.0754958,
+        -0.178786, 0.0856893, 0.0802652,
+        0.0420324, -0.0810147, 0.0802652,
+        0.0420324, 0.0856893, 0.0802652,
+        -0.178786, -0.0810147, 0.0802652,
+        0.0420324, 0.0856893, 0.0802652,
+        0.0420324, -0.0810147, -0.0754958,
+        0.0420324, 0.0856893, -0.0754958,
+        0.0420324, -0.0810147, 0.0802652,
+        -0.178786, 0.0856893, -0.0754958,
+        -0.178786, -0.0810147, 0.0802652,
+        -0.178786, 0.0856893, 0.0802652,
+        -0.178786, -0.0810147, -0.0754958,
+        -0.178786, 0.0856893, -0.0754958,
+        0.0420324, 0.0856893, 0.0802652,
+        0.0420324, 0.0856893, -0.0754958,
+        -0.178786, 0.0856893, 0.0802652,
+        -0.178786, -0.0810147, 0.0802652,
+        0.0420324, -0.0810147, -0.0754958,
+        0.0420324, -0.0810147, 0.0802652,
+        -0.178786, -0.0810147, -0.0754958,
+        0.155052, -0.0035747, 0.00551521,
+        0.155052, -0.0794227, -0.0703328,
+        0.155052, 0.0722733, -0.0703328,
+        0.155052, -0.0794227, -0.0703328,
+        -0.0594726, -0.0035747, 0.00551521,
+        0.155052, 0.0722733, -0.0703328,
+        0.155052, -0.0794227, 0.0813632,
+        0.155052, -0.0794227, 0.0813632,
+        -0.0594726, -0.0035747, 0.00551521,
+        0.155052, -0.0794227, -0.0703328,
+        0.155052, 0.0722733, 0.0813632,
+        0.155052, 0.0722733, 0.0813632,
+        -0.0594726, -0.0035747, 0.00551521,
+        0.155052, -0.0794227, 0.0813632,
+        0.155052, 0.0722733, -0.0703328,
+        -0.0594726, -0.0035747, 0.00551521,
+        0.155052, 0.0722733, 0.0813632
     };
 
+    static constexpr size_t camera_model_faces_num_ = 20;
+    unsigned int camera_model_faces_[camera_model_faces_num_ * 3] = {
+        0, 1, 2,
+        3, 4, 5,
+        6, 7, 8,
+        6, 9, 7,
+        10, 11, 12,
+        10, 13, 11,
+        14, 15, 16,
+        14, 17, 15,
+        18, 19, 20,
+        18, 21, 19,
+        22, 23, 24,
+        22, 25, 23,
+        26, 27, 28,
+        29, 30, 31,
+        26, 32, 27,
+        33, 34, 35,
+        26, 36, 32,
+        37, 38, 39,
+        26, 28, 36,
+        40, 41, 42,
+    };
 };
