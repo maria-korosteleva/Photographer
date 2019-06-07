@@ -34,7 +34,9 @@ public:
     void saveImageCamerasParamsCV(const std::string path = "./");
 
     void setObject(GeneralMesh* object);
-    void addCameraToPosition(float x, float y, float z);
+    // allows to specify either absolute position
+    // or direction + distance to target (if dist is set)
+    void addCameraToPosition(float x, float y, float z, float dist = -1.0);
 
 private:
     static constexpr const char* const vertex_shader_path_ = "./Shaders/VertexShader.glsl";

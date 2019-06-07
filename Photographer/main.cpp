@@ -11,9 +11,9 @@ int main()
 
     Photographer photographer(&object);
 
-    photographer.addCameraToPosition(0.0f, 1.0f, 3.0f);
-    photographer.addCameraToPosition(0.0f, -1.0f, -2.0f);
-    photographer.addCameraToPosition(-1.0f, 1.0f, 3.0f);
+    photographer.addCameraToPosition(0.0f, 1.0f, 3.0f, 4.0f);
+    photographer.addCameraToPosition(0.0f, -1.0f, -2.0f, 4.0f);
+    photographer.addCameraToPosition(-1.0f, 1.0f, 3.0f, 4.0f);
 
     photographer.renderToImages("./images/");
     photographer.saveImageCamerasParamsCV("./images/");

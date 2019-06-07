@@ -119,11 +119,18 @@ void Photographer::setObject(GeneralMesh * object)
     object_ = object;
 }
 
-void Photographer::addCameraToPosition(float x, float y, float z)
+void Photographer::addCameraToPosition(float x, float y, float z, float dist)
 {
     Camera camera(win_width_, win_height_);
-    camera.setPosition(glm::vec3(x, y, z));
 
+    glm::vec3 position = glm::vec3(x, y, z);
+    if (dist > 0.0)
+    {
+        position -= default_camera_target_;
+        position = dist * glm::normalize(position);
+    }
+    
+    camera.setPosition(position);
     camera.setTarget(default_camera_target_);
 
     image_cameras_.push_back(camera);
