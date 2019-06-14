@@ -15,7 +15,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 // From other Project 
-#include <GK-Undressing-People-Ceres/GeneralMesh.h>
+#include <GeneralMesh/GeneralMesh.h>
 
 // Local
 #include "Shader.h"

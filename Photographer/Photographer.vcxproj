@@ -71,22 +71,22 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\Maria\MyDocs\GigaKorea\GK-Undressing-People-Ceres\;C:\Users\Maria\MyDocs\libs\eigen-eigen-5a0156e40feb;C:\Users\Maria\MyDocs\libs\libigl\include;C:\Users\Maria\MyDocs\libs\glfw\install_x64\include;$(IncludePath);C:\Users\Maria\MyDocs\libs\libigl\include</IncludePath>
+    <IncludePath>C:\Users\Maria\MyDocs\libs\glfw\install_x64\include;$(IncludePath);C:\Users\Maria\MyDocs\libs\libigl\include</IncludePath>
     <LibraryPath>C:\Users\Maria\MyDocs\libs\glfw\install_x64\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\Maria\MyDocs\GigaKorea\GK-Undressing-People-Ceres\;C:\Users\Maria\MyDocs\libs\eigen-eigen-5a0156e40feb;C:\Users\Maria\MyDocs\libs\libigl\include;C:\Users\Maria\MyDocs\libs\glfw\install_x64\include;$(IncludePath);C:\Users\Maria\MyDocs\libs\libigl\include</IncludePath>
+    <IncludePath>C:\Users\Maria\MyDocs\libs\glfw\install_x64\include;$(IncludePath);C:\Users\Maria\MyDocs\libs\libigl\include</IncludePath>
     <LibraryPath>C:\Users\Maria\MyDocs\libs\glfw\install_x64\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\Maria\MyDocs\GigaKorea\GK-Undressing-People-Ceres\;C:\Users\Maria\MyDocs\libs\eigen-eigen-5a0156e40feb;C:\Users\Maria\MyDocs\libs\libigl\include;C:\Users\Maria\MyDocs\libs\glfw\install_x64\include;C:\Users\Maria\MyDocs\libs\Installed_libs\include;$(IncludePath);C:\Users\Maria\MyDocs\libs\libigl\include</IncludePath>
+    <IncludePath>C:\Users\Maria\MyDocs\libs\glfw\install_x64\include;C:\Users\Maria\MyDocs\libs\Installed_libs\include;$(IncludePath);C:\Users\Maria\MyDocs\libs\libigl\include</IncludePath>
     <LibraryPath>C:\Users\Maria\MyDocs\libs\glfw\install_x64\lib;$(LibraryPath)</LibraryPath>
-    <SourcePath>C:\Users\Maria\MyDocs\libs\Installed_libs\src;$(SourcePath)</SourcePath>
+    <SourcePath>C:\Users\Maria\MyDocs\my_modules\GeneralMesh;C:\Users\Maria\MyDocs\libs\Installed_libs\src;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\Maria\MyDocs\GigaKorea\GK-Undressing-People-Ceres\;C:\Users\Maria\MyDocs\libs\eigen-eigen-5a0156e40feb;C:\Users\Maria\MyDocs\libs\libigl\include;C:\Users\Maria\MyDocs\libs\glfw\install_x64\include;C:\Users\Maria\MyDocs\libs\Installed_libs\include;$(IncludePath);C:\Users\Maria\MyDocs\libs\libigl\include</IncludePath>
+    <IncludePath>C:\Users\Maria\MyDocs\libs\glfw\install_x64\include;C:\Users\Maria\MyDocs\libs\Installed_libs\include;$(IncludePath);C:\Users\Maria\MyDocs\libs\libigl\include</IncludePath>
     <LibraryPath>C:\Users\Maria\MyDocs\libs\glfw\install_x64\lib;$(LibraryPath)</LibraryPath>
-    <SourcePath>C:\Users\Maria\MyDocs\libs\Installed_libs\src;$(SourcePath)</SourcePath>
+    <SourcePath>C:\Users\Maria\MyDocs\my_modules\GeneralMesh;C:\Users\Maria\MyDocs\libs\Installed_libs\src;$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -94,6 +94,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\Maria\MyDocs\my_modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -107,6 +108,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>C:\Users\Maria\MyDocs\my_modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -121,6 +123,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\Maria\MyDocs\my_modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -136,6 +139,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Users\Maria\MyDocs\my_modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -145,8 +149,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\GigaKorea\GK-Undressing-People-Ceres\GK-Undressing-People-Ceres\GeneralMesh.cpp" />
     <ClCompile Include="..\..\..\libs\Installed_libs\src\glad.c" />
+    <ClCompile Include="..\..\..\my_modules\GeneralMesh\GeneralMesh.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Photographer.cpp" />
@@ -154,7 +158,6 @@
     <ClCompile Include="Shaders\stb_source_loader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\GigaKorea\GK-Undressing-People-Ceres\GK-Undressing-People-Ceres\GeneralMesh.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Photographer.h" />
     <ClInclude Include="Shader.h" />

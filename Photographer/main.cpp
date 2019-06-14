@@ -1,5 +1,5 @@
 #include "Photographer.h"
-#include <GK-Undressing-People-Ceres/GeneralMesh.h>
+#include <GeneralMesh/GeneralMesh.h>
 
 #include <iostream>
 
