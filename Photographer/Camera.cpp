@@ -143,9 +143,15 @@ void Camera::zoom(float delta)
 
 void Camera::saveParamsForOpenCV(const std::string path)
 {
-    glm::mat4 extrinsic = glm::transpose(getGlViewMatrix()); // transposed because of the colomn-wise storage
     glm::mat3 intrinsics = getCVIntrinsicsMatrix();
 
+    glm::mat4 extrinsic = glm::transpose(getGlViewMatrix()); // transposed because of the colomn-wise storage
+    //glm::mat4 turn_y_180 = glm::mat4(1.0);
+    //turn_y_180[0][0] = -1.0f;
+    //turn_y_180[2][2] = -1.0f;
+    //extrinsic = turn_y_180 * extrinsic; // yes, right, the whole resulting scene is rotated!
+
+    // Save
     // very hardcore approach. But no new dependencies!
     std::ofstream xml_file;
     xml_file.open(path + "/" + std::to_string(ID_) + ".xml");
