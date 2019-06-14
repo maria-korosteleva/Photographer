@@ -26,6 +26,19 @@ glm::mat4 Camera::getGlViewMatrix()
     return glm::lookAt(position_, position_ + front_, up_);
 }
 
+glm::mat4 Camera::getCVExtrinsicsMatrix()
+{
+    glm::mat4 extrinsics = getGlViewMatrix();
+
+    // now rotate the whole final scene to match opencv coordinate system orientation 
+    glm::mat4 turn_y_180 = glm::mat4(1.0);
+    turn_y_180[0][0] = -1.0f;
+    turn_y_180[2][2] = -1.0f;
+    extrinsics = extrinsics * turn_y_180;
+
+    return extrinsics;
+}
+
 glm::mat4 Camera::getGlProjectionMatrix()
 {
     return glm::perspective(glm::radians(field_of_view_y_), screen_width_ / screen_height_, 0.1f, 100.0f);
@@ -35,17 +48,13 @@ glm::mat3 Camera::getCVIntrinsicsMatrix()
 {
     glm::mat3 intrinsics = glm::mat3(1.0f);  // identity
 
-    //float ratio = screen_width_ / screen_height_;
-
-    // tan(fov_x) = ratio * tan(fov_y)
-    // float pix_focal_x = screen_width_ / (2 * ratio * tan(glm::radians(field_of_view_y_) / 2));
-    // same for x and y, since we assume that apperture ratio matches the output image aspect ratio
     float pix_focal = screen_height_ / (2 * tan(glm::radians(field_of_view_y_) / 2));
 
+    // column-wise storage: mat[col][row]
     intrinsics[0][0] = pix_focal;
     intrinsics[1][1] = pix_focal;
-    intrinsics[0][2] = screen_width_ / 2;
-    intrinsics[1][2] = screen_height_ / 2;
+    intrinsics[2][0] = screen_width_ / 2;
+    intrinsics[2][1] = screen_height_ / 2;
 
     return intrinsics;
 }
@@ -143,16 +152,10 @@ void Camera::zoom(float delta)
 
 void Camera::saveParamsForOpenCV(const std::string path)
 {
+    glm::mat4 extrinsics = getCVExtrinsicsMatrix();
     glm::mat3 intrinsics = getCVIntrinsicsMatrix();
 
-    glm::mat4 extrinsic = glm::transpose(getGlViewMatrix()); // transposed because of the colomn-wise storage
-    //glm::mat4 turn_y_180 = glm::mat4(1.0);
-    //turn_y_180[0][0] = -1.0f;
-    //turn_y_180[2][2] = -1.0f;
-    //extrinsic = turn_y_180 * extrinsic; // yes, right, the whole resulting scene is rotated!
-
-    // Save
-    // very hardcore approach. But no new dependencies!
+    // Save. Very hardcore approach. But no new dependencies!
     std::ofstream xml_file;
     xml_file.open(path + "/" + std::to_string(ID_) + ".xml");
 
@@ -170,7 +173,7 @@ void Camera::saveParamsForOpenCV(const std::string path)
         xml_file << "\t\t";
         for (int j = 0; j < 4; ++j)
         {
-            xml_file << extrinsic[i][j] << " ";     
+            xml_file << extrinsics[j][i] << " ";     // colwise storage
         }
         xml_file << std::endl;
     }
@@ -187,7 +190,7 @@ void Camera::saveParamsForOpenCV(const std::string path)
         xml_file << "\t\t";
         for (int j = 0; j < 3; ++j)
         {
-            xml_file << intrinsics[i][j] << " ";
+            xml_file << intrinsics[j][i] << " ";    // colwise storage
         }
         xml_file << std::endl;
     }

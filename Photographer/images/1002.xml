@@ -5,9 +5,9 @@
 	<cols>4</cols>
 	<dt>d</dt>
 	<data>
-		0.707107 -0 0.707107 -0 
-		0 1 0 -0 
-		-0.707107 -0 0.707107 -4 
+		-0.707107 0 -0.707107 0 
+		0 1 0 0 
+		0.707107 0 -0.707107 -4 
 	</data>
 </CameraMatrix>
 <Intrinsics type_id="opencv-matrix">

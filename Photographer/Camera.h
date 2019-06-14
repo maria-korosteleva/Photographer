@@ -35,6 +35,7 @@ public:
     glm::vec3 getFrontVector() { return front_; }
     
     glm::mat4 getGlViewMatrix();
+    glm::mat4 getCVExtrinsicsMatrix();
     glm::mat4 getGlProjectionMatrix();
     glm::mat3 getCVIntrinsicsMatrix();
 
