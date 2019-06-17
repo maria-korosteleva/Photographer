@@ -46,7 +46,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -90,7 +90,7 @@
     <IncludePath>C:\Users\Maria\MyDocs\libs\glfw\install_x64\include;C:\Users\Maria\MyDocs\libs\Installed_libs\include;$(IncludePath);C:\Users\Maria\MyDocs\libs\libigl\include</IncludePath>
     <LibraryPath>C:\Users\Maria\MyDocs\libs\glfw\install_x64\lib;$(LibraryPath)</LibraryPath>
     <SourcePath>C:\Users\Maria\MyDocs\my_modules\GeneralMesh;C:\Users\Maria\MyDocs\libs\Installed_libs\src;$(SourcePath)</SourcePath>
-    <TargetExt>.lib</TargetExt>
+    <TargetExt>.exe</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -170,8 +170,9 @@
     <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\FragmentShader.glsl" />
-    <None Include="Shaders\VertexShader.glsl" />
+    <None Include="cpp.hint" />
+    <None Include="Shaders\FragmentShader.h" />
+    <None Include="Shaders\VertexShader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,6 +1,40 @@
 #include "Shader.h"
 
 
+Shader::Shader(ShaderTypes vertex_shader_type, ShaderTypes fragment_shader_type)
+{
+    unsigned int vertex_shader;
+    unsigned int fragment_shader;
+
+    // Compile requested shaders
+    switch (vertex_shader_type)
+    {
+    case ShaderTypes::FULL_SHADER:
+        vertex_shader = Shader::compileVertexShader_(full_vertex_shader_source);
+        break;
+    case ShaderTypes::SIMPLE_SHADER:
+        vertex_shader = Shader::compileVertexShader_(default_vertex_shader_source_);
+        break;
+    }
+
+    switch (fragment_shader_type)
+    {
+    case ShaderTypes::FULL_SHADER:
+        fragment_shader = Shader::compileFragmentShader_(full_fragment_shader_source);
+        break;
+    case ShaderTypes::SIMPLE_SHADER:
+        fragment_shader = Shader::compileFragmentShader_(default_fragment_shader_source_);
+        break;
+    }
+
+    // create program
+    createProgram_(vertex_shader, fragment_shader);
+
+    // cleanup
+    glDeleteShader(vertex_shader);
+    glDeleteShader(fragment_shader);
+}
+
 Shader::Shader(const GLchar * vertex_path, const GLchar * fragment_path)
 {
     unsigned int vertex_shader;

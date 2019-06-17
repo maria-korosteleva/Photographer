@@ -9,14 +9,23 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Shaders/VertexShader.h"
+#include "Shaders/FragmentShader.h"
+
 // Macro for a more convenient shader specification
 #define SHADER_CODE_GLSL_TO_STRING(version, shader)  "#version " #version " core \n" #shader  
 
 class Shader
 {
-  public:
+public:
     // Constructor builds the shader
-    Shader(const GLchar* vertexPath = nullptr, const GLchar* fragmentPath = nullptr);
+    enum ShaderTypes
+    {
+        FULL_SHADER, 
+        SIMPLE_SHADER
+    };
+    Shader(ShaderTypes vertex_shader_type, ShaderTypes fragment_shader_type);
+    Shader(const GLchar* vertexPath, const GLchar* fragmentPath);
     ~Shader();
     // Activate the shader
     void use();
@@ -30,7 +39,7 @@ class Shader
     // Program ID
     unsigned int getID() { return this->ID_; }
   
-  private:
+private:
     void createProgram_(unsigned int vertex_shader, unsigned int fragment_shader);
 
     static std::string readCodeFile_(const GLchar* path);

@@ -220,10 +220,10 @@ void Photographer::createCameraObjectVAO_()
 void Photographer::createShaders_()
 {
     if (shader_ != nullptr) delete shader_;
-    shader_ = new Shader(vertex_shader_path_, fragment_shader_path_);
+    shader_ = new Shader(Shader::FULL_SHADER, Shader::FULL_SHADER);
 
     if (simple_shader_ != nullptr) delete simple_shader_;
-    simple_shader_ = new Shader(vertex_shader_path_);   // use default fragment shader
+    simple_shader_ = new Shader(Shader::FULL_SHADER, Shader::SIMPLE_SHADER);   // use default fragment shader
 }
 
 void Photographer::setUpTargetObjectColor_()
