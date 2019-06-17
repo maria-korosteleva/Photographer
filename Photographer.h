@@ -1,9 +1,9 @@
 #pragma once
-// Class is capable of loading the mesh from the file (.obj, .ply?) and render several views of it 
+// Class is capable of taking pictures of the 3D object from multiple cameras =)
+// Accepts GeneralMesh object as an input. 
 // from the pre-defined set of the cameras
-// Should know the locations of the shader files
-// Should know the location of the input of vertex shader
-// Note: the set-up of the Buffer objects is tightly coupled with the variable location settings in the shaders
+// 
+// Note: the set-up of the Buffer objects is tightly coupled with the variable location settings in the shaders loaded by the Shader class
 
 #include <iostream>
 #include <glad/glad.h> 
