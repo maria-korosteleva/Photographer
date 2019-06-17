@@ -3,7 +3,7 @@
 // from the pre-defined set of the cameras
 // Should know the locations of the shader files
 // Should know the location of the input of vertex shader
-// TODO get out the locations
+// Note: the set-up of the Buffer objects is tightly coupled with the variable location settings in the shaders
 
 #include <iostream>
 #include <glad/glad.h> 
