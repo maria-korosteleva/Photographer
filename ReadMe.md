@@ -22,6 +22,7 @@ The resulting camera will be put at the specified position looking at the object
 * glad (https://glad.dav1d.de/): please use the version that suits your settings
 * glfw (https://github.com/glfw/glfw)
 * glm (http://glm.g-truc.net/0.9.5/index.html)
+* stb_image_write.h (https://github.com/nothings/stb/blob/master/stb_image_write.h)
 (on Win you could borrow them here: https://motionlab.kaist.ac.kr/git/mariako/Installed_libs)
 
 Don't forget to add opengl32.lib; glfw3.lib; glad.lib; in the Linker options. If you don't have glad.lib, just add glad.c to your project. 
