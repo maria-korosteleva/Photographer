@@ -43,3 +43,4 @@ You can extend the class with the fuctionality you need
 * Allow to remove cameras
 * Allow to add arbitrary cameras
 * Backward projection
+* Support quad meshes (minor)
