@@ -4,7 +4,7 @@ A module to take pictures of the 3D object from multiple cameras =) Accepts Gene
 
 ## Functionality
 * Save the rendered images from the cameras as files
-* Save the camera parameters in OpenCV-friendly formats
+* Save the camera parameters in OpenCV-friendly formats (works for OpenPos: https://github.com/CMU-Perceptual-Computing-Lab/openpose/))
 * View the scene with the object and all the cameras
 
 ### Cameras: 
@@ -17,7 +17,7 @@ To add the camera you need to specify it's position, assuming the object is at t
 The resulting camera will be put at the specified position looking at the object
 
 ## Dependencies
-* GeneralMesh (https://motionlab.kaist.ac.kr/git/mariako/GeneralMesh) 
+* GeneralMesh (https://github.com/maria-korosteleva/GeneralMesh) 
 * OpenGL 3.3 or higher.
 * glad (https://glad.dav1d.de/): please use the version that suits your settings
 * glfw (https://github.com/glfw/glfw)
@@ -32,6 +32,9 @@ Don't forget to add opengl32.lib; glfw3.lib; glad.lib; in the Linker options. If
 * Add the project directory (or parent of it) to the include directories 
          (Configuration Properties -> C/C++ -> General -> Additional Include Directories)
 * Add the Photographer.lib to the Linker options (Configuration Properties -> Linker -> Input -> Additional Dependencies
+
+## For MCLab members
+Please, contact Maria before making any modifications
 
 ## Further development: 
 You can extend the class with the fuctionality you need
