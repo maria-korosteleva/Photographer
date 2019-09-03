@@ -51,11 +51,13 @@ static const char *full_fragment_shader_source = SHADER_CODE_GLSL_TO_STRING(330,
 
     // From Vertex shader
     in vec3 vs_normal;
+	in vec2 vs_uv;
     in vec3 vs_frag_position;  // in world coordinates
 
     // Uniform properties
     uniform Material material;
     uniform vec3 eye_pos;
+	uniform sampler2D Tex1;
 
     uniform DirectionalLight directional_light;
     const int NR_POINT_LIGHTS = 2;
@@ -84,7 +86,9 @@ static const char *full_fragment_shader_source = SHADER_CODE_GLSL_TO_STRING(330,
             out_color += CalcPointLight(point_lights[i], norm, view_dir);
         }
 
-        frag_color = vec4(out_color, 1.0);
+		//frag_color = vec4(out_color, 1.0);
+		vec2 refine_vs_uv = vec2(vs_uv.x, 1.0 - vs_uv.y);
+        frag_color = texture(Tex1, refine_vs_uv) * vec4(out_color, 1.0);
     }
 
     // -------------- implemetations ---------------

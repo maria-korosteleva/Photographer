@@ -74,10 +74,11 @@ void Photographer::renderToImages(const std::string path)
     GLFWwindow* window = initWindowContext_(false);
     initCustomBuffer_();
 
-    setUpScene_();
 
     for (auto &&camera: image_cameras_)
     {
+		setUpScene_();
+
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
 
         // render
@@ -140,9 +141,9 @@ void Photographer::addCameraToPosition(float x, float y, float z, float dist)
 
 void Photographer::setUpScene_()
 {
+	createShaders_();
     createTargetObjectVAO_();
     createCameraObjectVAO_();
-    createShaders_();
     setUpTargetObjectColor_();
     setUpLight_();
 }
@@ -156,34 +157,56 @@ void Photographer::createTargetObjectVAO_()
         std::cout << "ERROR::CREATE OBJECT BUFFERS::OBJECT BUFFERS WERE ALREADY ALLOCATED. DATA IS LOST\n" << std::endl;
     }
 
+
     glGenVertexArrays(1, &object_vertex_array_);
     glBindVertexArray(object_vertex_array_);
 
-    const std::vector<GeneralMesh::GLMVertex>* verts = &object_->getGLNormalizedVertices();
+    const std::vector<GeneralMesh::GLMVertexWithUV>* verts = &object_->getGLNormalizedVerticesWithUV();
     glGenBuffers(1, &object_vertex_buffer_);
     glBindBuffer(GL_ARRAY_BUFFER, object_vertex_buffer_);
     glBufferData(GL_ARRAY_BUFFER, 
-        object_->getGLNormalizedVertices().size() * sizeof(GeneralMesh::GLMVertex),
-        &object_->getGLNormalizedVertices()[0], GL_STATIC_DRAW);
+        object_->getGLNormalizedVerticesWithUV().size() * sizeof(GeneralMesh::GLMVertexWithUV),
+        &object_->getGLNormalizedVerticesWithUV()[0], GL_STATIC_DRAW);
 
-    glGenBuffers(1, &object_element_buffer_);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, object_element_buffer_);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-        object_->getGLMFaces().size() * sizeof(unsigned int), 
-        &object_->getGLMFaces()[0], GL_STATIC_DRAW);
 
     // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GeneralMesh::GLMVertex), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GeneralMesh::GLMVertexWithUV), (void*)0);
     glEnableVertexAttribArray(0);
     // normals
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GeneralMesh::GLMVertex), 
-        (void*)offsetof(GeneralMesh::GLMVertex, GeneralMesh::GLMVertex::normal));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(GeneralMesh::GLMVertexWithUV),
+        (void*)offsetof(GeneralMesh::GLMVertexWithUV, GeneralMesh::GLMVertexWithUV::normal));
     glEnableVertexAttribArray(1);
 
+	//texture
+	if (true) {
+		const GeneralMesh::TextureInfo& tex = object_->getTexInfo();
+		glActiveTexture(GL_TEXTURE0);
+
+		glGenTextures(1, &object_texture_);
+		
+		glBindTexture(GL_TEXTURE_2D, object_texture_);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tex.width, tex.height, 0, GL_RGB, GL_UNSIGNED_BYTE, tex.data);
+		float borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+
+		glUniform1i(glGetUniformLocation(shader_->getID(), "Tex1"), 0);
+		//stbi_image_free(tex.data);
+
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, object_texture_);
+
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(GeneralMesh::GLMVertexWithUV),
+			(void*)offsetof(GeneralMesh::GLMVertexWithUV, GeneralMesh::GLMVertexWithUV::uv));
+		glEnableVertexAttribArray(2);
+	}
     // Cleaning
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void Photographer::createCameraObjectVAO_()
@@ -303,8 +326,13 @@ void Photographer::drawMainObject_(Shader& shader)
 
     shader.setUniform("model", model);
     shader.setUniform("normal_matrix", glm::transpose(glm::inverse(model)));
-    // second argument is the tot number of vertices to draw
-    glDrawElements(GL_TRIANGLES, object_->getFaces().size(), GL_UNSIGNED_INT, 0); 
+	if (true) {
+		glDrawArrays(GL_TRIANGLES, 0, object_->getFaces().size());
+	}
+	else {
+		// second argument is the tot number of vertices to draw
+		glDrawElements(GL_TRIANGLES, object_->getFaces().size(), GL_UNSIGNED_INT, 0);
+	}
 }
 
 void Photographer::drawImageCameraObjects_(Shader & shader)
