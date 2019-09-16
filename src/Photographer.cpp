@@ -475,7 +475,9 @@ void Photographer::saveRGBTexToFile_(const std::string filename, unsigned int te
     else if (internal_format == GL_RGBA) n_channels = 4;
     else
     {
-        std::cout << "ERROR::WRITING TEXTURE TO FILE::Unknown texture format " << internal_format << std::endl;
+        n_channels = 3;
+        std::cout << "Photographer::WARNING::WRITING TEXTURE TO FILE::Unknown texture format " << internal_format
+            << ". The default number of channels (3) is used."<< std::endl;
     }
 
     std::vector<unsigned char> image(width *  height * n_channels);
