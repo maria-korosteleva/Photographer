@@ -468,6 +468,12 @@ void Photographer::cleanAndCloseContext_()
         texture_color_buffer_ = 0;
     }
 
+	if (depth_render_buffer_)
+	{
+		glDeleteRenderbuffers(1, &depth_render_buffer_);
+		depth_render_buffer_ = 0;
+	}
+
     if (shader_ != nullptr)
     {
         delete shader_;
